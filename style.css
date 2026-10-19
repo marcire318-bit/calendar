@@ -1,0 +1,47 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.cell {
+  border: 1px solid #ccc;
+  padding: 5px;
+  min-height: 80px;
+  position: relative;
+}
+
+.day {
+  font-weight: bold;
+}
+
+.today {
+  background: #fffae6;
+}
+
+.event {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.event.upcoming {
+  color: #0066cc;
+}
+
+.event.live {
+  color: #cc0000;
+  font-weight: bold;
+}
