@@ -1,6 +1,6 @@
 body {
   font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
-  background: #f0faff; /* 透明感のある水色 */
+  background: #f0faff;
   color: #222;
   margin: 0;
   padding: 20px;
@@ -11,7 +11,7 @@ h1 {
   text-align: center;
   font-size: 28px;
   margin-bottom: 20px;
-  color: #64C8F0; /* ライバーカラー */
+  color: #64C8F0;
   font-weight: 700;
   letter-spacing: 1.5px;
 }
@@ -40,7 +40,7 @@ h1 {
   background: #4bb8e0;
 }
 
-/* カレンダー本体 */
+/* カレンダー本体（PC） */
 .grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -89,21 +89,64 @@ h1 {
   font-weight: 500;
 }
 
-/* ライブ中（濃い水色で強調） */
+/* ライブ中 */
 .event.live a {
   background: #4bb8e0;
   font-weight: 700;
 }
 
-/* アーカイブ（落ち着いた水色） */
+/* アーカイブ */
 .event.archive a {
   background: #e6f7ff;
   color: #2a7fa3;
 }
 
-/* 予定（淡い水色） */
+/* 予定 */
 .event.upcoming a {
   background: #dff5ff;
   color: #64C8F0;
 }
 
+/* ▼ スマホ向け（画面幅600px以下） */
+@media (max-width: 600px) {
+
+  /* カレンダーを横スクロールにする */
+  #calendar {
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  /* グリッドは幅固定しない（重要） */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  /* セルを小さく */
+  .cell {
+    min-height: 60px;
+    padding: 4px;
+  }
+
+  .day {
+    font-size: 13px;
+  }
+
+  .event a {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+
+  /* 詳細パネルを縦並びに */
+  #detail-panel {
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  #detail-thumbnail img {
+    width: 100%;
+    border-radius: 6px;
+  }
+}
