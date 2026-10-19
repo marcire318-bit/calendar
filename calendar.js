@@ -125,22 +125,20 @@ function renderCalendar(events) {
   `;
 
   // ▼ ホバーしたら詳細パネルに表示
-  el.addEventListener("mouseenter", () => {
-    const thumb = ev.snippet.thumbnails?.medium?.url || "";
-    const desc = ev.snippet.description || "";
+el.addEventListener("mouseenter", () => {
+  const thumb = ev.snippet.thumbnails?.high?.url || "";
+  
+  document.getElementById("detail-thumbnail").innerHTML =
+    thumb ? `<img src="${thumb}" />` : "";
 
-    document.getElementById("detail-thumbnail").innerHTML =
-      thumb ? `<img src="${thumb}" />` : "";
-
-    document.getElementById("detail-info").innerHTML = `
-      <h3>${ev.snippet.title}</h3>
-      <p>${desc.replace(/\n/g, "<br>")}</p>
-      <a href="https://www.youtube.com/watch?v=${ev.id}" target="_blank">
-        YouTubeで見る
-      </a>
-    `;
-  });
-
+  document.getElementById("detail-info").innerHTML = `
+    <h3>${ev.snippet.title}</h3>
+    <a href="https://www.youtube.com/watch?v=${ev.id}" target="_blank">
+      YouTubeで見る
+    </a>
+  `;
+});
+      
   // ▼ cell に追加
   cell.appendChild(el);
 });
