@@ -13,6 +13,23 @@ async function fetchUpcomingAndLive() {
     ...liveRes.items.map(i => i.id.videoId)
   ];
 
+  async function fetchArchives() {
+  const url = `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${CHANNEL_ID}&type=video&order=date&maxResults=20&key=${API_KEY}`;
+  const res = await fetch(url).then(r => r.json());
+
+  const ids = res.items.map(i => i.id.videoId);
+
+  if (ids.length === 0) return [];
+
+  const detailUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${ids.join(",")}&key=${API_KEY}`;
+  const detailRes = await fetch(detailUrl).then(r => r.json());
+
+  return detailRes.items.filter(v => {
+    const live = v.liveStreamingDetails;
+    return live && live.actualEndTime;
+  });
+}
+
   if (ids.length === 0) return [];
 
   const detailUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${ids.join(",")}&key=${API_KEY}`;
@@ -94,8 +111,12 @@ function renderCalendar(events) {
 }
 
 async function init() {
-  const events = await fetchUpcomingAndLive();
-  renderCalendar(events);
+  const upcomingAndLive = await fetchUpcomingAndLive();
+  const archives = await fetchArchives();
+
+  const allEvents = [...upcomingAndLive, ...archives];
+
+  renderCalendar(allEvents);
 }
 
 init();
