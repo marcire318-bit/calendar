@@ -110,16 +110,23 @@ h1 {
 /* ▼ スマホ向け（画面幅600px以下） */
 @media (max-width: 600px) {
 
-  /* ▼ グリッドが崩れて白紙になるのを防ぐ */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* ← これが重要 */
-    width: 100%;
+  /* カレンダー全体を横スクロールにする */
+  #calendar {
+    overflow-x: auto;
+    padding-bottom: 10px;
   }
 
-  /* ▼ セルを小さくして縦長になりすぎないようにする */
+  /* グリッドを横幅固定にする（7列分の幅を確保） */
+  .grid {
+    width: 700px; /* ← 100px × 7列 のイメージ */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  /* セルをスマホ向けに小さく */
   .cell {
-    min-height: 50px;
+    min-height: 60px;
     padding: 4px;
   }
 
@@ -132,32 +139,15 @@ h1 {
     padding: 2px 4px;
   }
 
-  /* ▼ 詳細パネルは縦並びに */
+  /* 詳細パネルは縦並び */
   #detail-panel {
     flex-direction: column;
     padding: 10px;
     gap: 10px;
   }
 
-  /* ▼ サムネイルをスマホ幅に合わせる */
   #detail-thumbnail img {
     width: 100%;
     border-radius: 6px;
-  }
-
-  /* ▼ タイトルとボタンを見やすく */
-  #detail-info h3 {
-    font-size: 16px;
-  }
-
-  #detail-info a {
-    display: inline-block;
-    background: #64C8F0;
-    color: #fff;
-    padding: 10px 14px;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 15px;
-    margin-top: 10px;
   }
 }
