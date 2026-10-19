@@ -1,47 +1,111 @@
 body {
-  font-family: sans-serif;
-  margin: 20px;
+  font-family: "Hiragino Maru Gothic ProN", "Rounded Mplus 1c", sans-serif;
+  background: #f2fbff; /* ほんのり水色 */
+  color: #333;
+  margin: 0;
+  padding: 20px;
 }
 
+/* タイトル */
+h1 {
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 20px;
+  color: #64C8F0; /* 緋八マナカラー */
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(100, 200, 240, 0.4);
+}
+
+/* 月移動ボタン */
 .header {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
+.header button {
+  background: #64C8F0;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.2s;
+  box-shadow: 0 2px 6px rgba(100, 200, 240, 0.4);
+}
+
+.header button:hover {
+  background: #4bb8e0;
+}
+
+/* カレンダー本体 */
 .grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+  gap: 10px;
 }
 
+/* セル（角丸＋淡い水色の枠） */
 .cell {
-  border: 1px solid #ccc;
-  padding: 5px;
-  min-height: 80px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 10px;
+  min-height: 130px;
+  box-shadow: 0 2px 6px rgba(100, 200, 240, 0.25);
   position: relative;
+  border: 2px solid #dff5ff;
 }
 
+/* 日付 */
 .day {
   font-weight: bold;
+  font-size: 16px;
+  color: #64C8F0;
+  margin-bottom: 6px;
 }
 
+/* 今日 */
 .today {
-  background: #fffae6;
+  border: 3px solid #64C8F0;
+  box-shadow: 0 0 10px rgba(100, 200, 240, 0.4);
 }
 
+/* イベント共通 */
 .event {
-  margin-top: 5px;
-  font-size: 12px;
+  margin: 4px 0;
+  font-size: 13px;
+  line-height: 1.3;
 }
 
-.event.upcoming {
-  color: #0066cc;
+/* リンク */
+.event a {
+  text-decoration: none;
+  color: #fff;
+  background: #64C8F0;
+  padding: 5px 7px;
+  border-radius: 8px;
+  display: inline-block;
+  box-shadow: 0 2px 4px rgba(100, 200, 240, 0.3);
 }
 
-.event.live {
-  color: #cc0000;
+/* ライブ中（濃い水色で強調） */
+.event.live a {
+  background: #4bb8e0;
   font-weight: bold;
+}
+
+/* アーカイブ（淡い水色） */
+.event.archive a {
+  background: #e8f8ff;
+  color: #2a7fa3;
+}
+
+/* 予定（白×水色で爽やか） */
+.event.upcoming a {
+  background: #dff5ff;
+  color: #64C8F0;
 }
