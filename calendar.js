@@ -110,18 +110,41 @@ function renderCalendar(events) {
     });
 
     dayEvents.forEach(ev => {
-      const live = ev.liveStreamingDetails;
-      const isLive = live && live.actualStartTime && !live.actualEndTime;
-      const isArchive = ev.archiveStart && (!live || live.actualEndTime);
+  const live = ev.liveStreamingDetails;
+  const isLive = live && live.actualStartTime && !live.actualEndTime;
+  const isArchive = ev.archiveStart && (!live || live.actualEndTime);
 
-      cell.innerHTML += `
-        <div class="event ${isLive ? "live" : isArchive ? "archive" : "upcoming"}">
-          <a href="https://www.youtube.com/watch?v=${ev.id}" target="_blank">
-            ${ev.snippet.title}
-          </a>
-        </div>
-      `;
-    });
+  // ▼ DOM を作る
+  const el = document.createElement("div");
+  el.className = `event ${isLive ? "live" : isArchive ? "archive" : "upcoming"}`;
+
+  el.innerHTML = `
+    <a href="https://www.youtube.com/watch?v=${ev.id}" target="_blank">
+      ${ev.snippet.title}
+    </a>
+  `;
+
+  // ▼ ホバーしたら詳細パネルに表示
+  el.addEventListener("mouseenter", () => {
+    const thumb = ev.snippet.thumbnails?.medium?.url || "";
+    const desc = ev.snippet.description || "";
+
+    document.getElementById("detail-thumbnail").innerHTML =
+      thumb ? `<img src="${thumb}" />` : "";
+
+    document.getElementById("detail-info").innerHTML = `
+      <h3>${ev.snippet.title}</h3>
+      <p>${desc.replace(/\n/g, "<br>")}</p>
+      <a href="https://www.youtube.com/watch?v=${ev.id}" target="_blank">
+        YouTubeで見る
+      </a>
+    `;
+  });
+
+  // ▼ cell に追加
+  cell.appendChild(el);
+});
+
 
     grid.appendChild(cell);
   }
