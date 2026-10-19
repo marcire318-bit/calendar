@@ -13,7 +13,16 @@ async function fetchUpcomingAndLive() {
     ...liveRes.items.map(i => i.id.videoId)
   ];
 
-  async function fetchArchives() {
+  if (ids.length === 0) return [];
+
+  const detailUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${ids.join(",")}&key=${API_KEY}`;
+  const detailRes = await fetch(detailUrl).then(r => r.json());
+
+  return detailRes.items;
+}
+
+/* ここが重要：fetchArchives は関数の外に置く */
+async function fetchArchives() {
   const url = `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${CHANNEL_ID}&type=video&order=date&maxResults=20&key=${API_KEY}`;
   const res = await fetch(url).then(r => r.json());
 
@@ -26,16 +35,8 @@ async function fetchUpcomingAndLive() {
 
   return detailRes.items.filter(v => {
     const live = v.liveStreamingDetails;
-    return live && live.actualEndTime;
+    return live && live.actualEndTime; // アーカイブ判定
   });
-}
-
-  if (ids.length === 0) return [];
-
-  const detailUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${ids.join(",")}&key=${API_KEY}`;
-  const detailRes = await fetch(detailUrl).then(r => r.json());
-
-  return detailRes.items;
 }
 
 let current = new Date();
@@ -85,7 +86,7 @@ function renderCalendar(events) {
 
     const dayEvents = events.filter(ev => {
       const live = ev.liveStreamingDetails;
-      const start = live.scheduledStartTime || live.actualStartTime;
+      const start = live.scheduledStartTime || live.actualStartTime || live.actualEndTime;
       if (!start) return false;
       const evDate = new Date(start);
       return evDate.toDateString() === date.toDateString();
@@ -94,9 +95,10 @@ function renderCalendar(events) {
     dayEvents.forEach(ev => {
       const live = ev.liveStreamingDetails;
       const isLive = live.actualStartTime && !live.actualEndTime;
+      const isArchive = live.actualEndTime;
 
       cell.innerHTML += `
-        <div class="event ${isLive ? "live" : "upcoming"}">
+        <div class="event ${isLive ? "live" : isArchive ? "archive" : "upcoming"}">
           <a href="https://www.youtube.com/watch?v=${ev.id}" target="_blank">
             ${ev.snippet.title}
           </a>
