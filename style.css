@@ -1,7 +1,7 @@
 body {
-  font-family: "Hiragino Maru Gothic ProN", "Rounded Mplus 1c", sans-serif;
-  background: #f2fbff; /* ほんのり水色 */
-  color: #333;
+  font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+  background: #f0faff; /* 透明感のある水色 */
+  color: #222;
   margin: 0;
   padding: 20px;
 }
@@ -9,12 +9,11 @@ body {
 /* タイトル */
 h1 {
   text-align: center;
-  font-size: 30px;
+  font-size: 28px;
   margin-bottom: 20px;
   color: #64C8F0; /* 緋八マナカラー */
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 4px rgba(100, 200, 240, 0.4);
+  font-weight: 700;
+  letter-spacing: 1.5px;
 }
 
 /* 月移動ボタン */
@@ -30,12 +29,11 @@ h1 {
   background: #64C8F0;
   border: none;
   padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 6px;
+  font-size: 15px;
   cursor: pointer;
   color: #fff;
   transition: 0.2s;
-  box-shadow: 0 2px 6px rgba(100, 200, 240, 0.4);
 }
 
 .header button:hover {
@@ -49,29 +47,28 @@ h1 {
   gap: 10px;
 }
 
-/* セル（角丸＋淡い水色の枠） */
+/* セル（男性ライバー向けにシャープに） */
 .cell {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 10px;
   padding: 10px;
-  min-height: 130px;
-  box-shadow: 0 2px 6px rgba(100, 200, 240, 0.25);
-  position: relative;
-  border: 2px solid #dff5ff;
+  min-height: 120px;
+  box-shadow: 0 2px 6px rgba(100, 200, 240, 0.2);
+  border: 1px solid #d6eef8;
 }
 
 /* 日付 */
 .day {
-  font-weight: bold;
-  font-size: 16px;
+  font-weight: 600;
+  font-size: 15px;
   color: #64C8F0;
   margin-bottom: 6px;
 }
 
 /* 今日 */
 .today {
-  border: 3px solid #64C8F0;
-  box-shadow: 0 0 10px rgba(100, 200, 240, 0.4);
+  border: 2px solid #64C8F0;
+  box-shadow: 0 0 8px rgba(100, 200, 240, 0.4);
 }
 
 /* イベント共通 */
@@ -81,30 +78,30 @@ h1 {
   line-height: 1.3;
 }
 
-/* リンク */
+/* リンク（男性ライバー向けに少しシャープ） */
 .event a {
   text-decoration: none;
   color: #fff;
   background: #64C8F0;
-  padding: 5px 7px;
-  border-radius: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
   display: inline-block;
-  box-shadow: 0 2px 4px rgba(100, 200, 240, 0.3);
+  font-weight: 500;
 }
 
 /* ライブ中（濃い水色で強調） */
 .event.live a {
   background: #4bb8e0;
-  font-weight: bold;
+  font-weight: 700;
 }
 
-/* アーカイブ（淡い水色） */
+/* アーカイブ（落ち着いた水色） */
 .event.archive a {
-  background: #e8f8ff;
+  background: #e6f7ff;
   color: #2a7fa3;
 }
 
-/* 予定（白×水色で爽やか） */
+/* 予定（淡い水色） */
 .event.upcoming a {
   background: #dff5ff;
   color: #64C8F0;
