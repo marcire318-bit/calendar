@@ -110,48 +110,46 @@ h1 {
 /* ▼ スマホ向け（画面幅600px以下） */
 @media (max-width: 600px) {
 
-  /* カレンダーのセルを小さくする */
+  /* ▼ グリッドが崩れて白紙になるのを防ぐ */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* ← これが重要 */
+    width: 100%;
+  }
+
+  /* ▼ セルを小さくして縦長になりすぎないようにする */
   .cell {
-    min-height: 60px;
+    min-height: 50px;
     padding: 4px;
   }
 
   .day {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .event a {
-    font-size: 12px;
-    padding: 3px 5px;
+    font-size: 11px;
+    padding: 2px 4px;
   }
 
-  /* カレンダー全体の余白を減らす */
-  #calendar {
-    margin-bottom: 10px;
-  }
-
-  /* 詳細パネルを縦並びにする */
+  /* ▼ 詳細パネルは縦並びに */
   #detail-panel {
     flex-direction: column;
-    min-height: auto;
     padding: 10px;
     gap: 10px;
   }
 
-  /* サムネイルをスマホ幅に合わせる */
+  /* ▼ サムネイルをスマホ幅に合わせる */
   #detail-thumbnail img {
     width: 100%;
-    max-width: 100%;
     border-radius: 6px;
   }
 
-  /* タイトルをスマホ向けに調整 */
+  /* ▼ タイトルとボタンを見やすく */
   #detail-info h3 {
     font-size: 16px;
-    margin-bottom: 8px;
   }
 
-  /* YouTubeボタンをタップしやすく */
   #detail-info a {
     display: inline-block;
     background: #64C8F0;
