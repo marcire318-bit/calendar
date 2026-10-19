@@ -1,5 +1,5 @@
 const API_KEY = "AIzaSyCmPoAEOooOsvgJo9724J3NooRC13lS8f4"; 
-const CHANNEL_ID = "UCJFZiqLMntJufDCHc6bQixg"; // ← 動作確認用（ホロライブ公式）
+const CHANNEL_ID = "UCqXxS-9x9Ha_UiH6hG4kh5Q"; // 
 
 async function fetchUpcomingAndLive() {
   const url = `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${CHANNEL_ID}&eventType=upcoming&type=video&key=${API_KEY}`;
