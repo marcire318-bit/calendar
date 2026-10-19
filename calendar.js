@@ -34,9 +34,9 @@ async function fetchArchives() {
   const detailRes = await fetch(detailUrl).then(r => r.json());
 
   return detailRes.items.filter(v => {
-    const live = v.liveStreamingDetails;
-    return live && live.actualEndTime; // アーカイブ判定
-  });
+  const live = v.liveStreamingDetails;
+  return live && (live.actualEndTime || live.actualStartTime);
+});
 }
 
 let current = new Date();
