@@ -106,3 +106,60 @@ h1 {
   background: #dff5ff;
   color: #64C8F0;
 }
+
+/* ▼ スマホ向け（画面幅600px以下） */
+@media (max-width: 600px) {
+
+  /* カレンダーのセルを小さくする */
+  .cell {
+    min-height: 60px;
+    padding: 4px;
+  }
+
+  .day {
+    font-size: 14px;
+  }
+
+  .event a {
+    font-size: 12px;
+    padding: 3px 5px;
+  }
+
+  /* カレンダー全体の余白を減らす */
+  #calendar {
+    margin-bottom: 10px;
+  }
+
+  /* 詳細パネルを縦並びにする */
+  #detail-panel {
+    flex-direction: column;
+    min-height: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  /* サムネイルをスマホ幅に合わせる */
+  #detail-thumbnail img {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 6px;
+  }
+
+  /* タイトルをスマホ向けに調整 */
+  #detail-info h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  /* YouTubeボタンをタップしやすく */
+  #detail-info a {
+    display: inline-block;
+    background: #64C8F0;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 15px;
+    margin-top: 10px;
+  }
+}
