@@ -565,8 +565,16 @@ h1 {
 /* 2つ以上ある日は配信を2列にする */
 .cell .event-item:has(~ .event-item),
 .cell .event-item ~ .event-item {
-  width: calc(50% - 3px);
+  width: calc(50% - 2px);
+  margin: 3px 0;
 }
+
+/* 2枚並びでもサムネイルを見やすく */
+.cell .event-item .event-thumbnail-button img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
 
 /* サムネイルは各列の幅に合わせる */
 .cell .event-item .event-thumbnail-button,
