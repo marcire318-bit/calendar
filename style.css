@@ -156,17 +156,11 @@ h1 {
 
 /* 各配信の枠 */
 .cell .event-item {
-  display: inline-block;
-  width: calc(33.333% - 4px);
+  display: block;
+  width: 100%;
   min-width: 0;
-  margin: 3px 1px;
+  margin: 3px 0;
   vertical-align: top;
-}
-
-/* 複数配信の日は2列にする */
-.cell .event-item:has(~ .event-item),
-.cell .event-item ~ .event-item {
-  width: calc(50% - 3px);
 }
 
 /* カレンダー内のサムネイルは中央を帯状に表示 */
@@ -188,10 +182,10 @@ h1 {
 .cell .event-thumbnail-button img {
   display: block;
   width: 100%;
-  height: 58px;
+  height: 34px;
   min-height: 0;
-  max-height: 58px;
-  aspect-ratio: 3 / 4;
+  max-height: 34px;
+  aspect-ratio: auto;
   object-fit: cover;
   object-position: center center;
   transition: filter 0.2s;
