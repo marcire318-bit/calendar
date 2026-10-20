@@ -652,4 +652,16 @@ h1 {
   object-fit: cover;
 }
 
+/* カレンダー内の画像を帯状に切り抜く指定を優先 */
+#calendar .cell .event-item .event-thumbnail-button img {
+  display: block !important;
+  width: 100% !important;
+  height: 34px !important;
+  min-height: 0 !important;
+  max-height: 34px !important;
+  aspect-ratio: auto !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
 
