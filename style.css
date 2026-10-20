@@ -288,11 +288,13 @@ h1 {
 }
 
 #detail-info h3 {
-  margin: 0 0 16px;
-  color: #e7f8ff;
-  font-size: clamp(16px, 1.5vw, 21px);
-  line-height: 1.7;
-  overflow-wrap: anywhere;
+  font-family:
+    "Yu Mincho",
+    "Hiragino Mincho ProN",
+    "Noto Serif JP",
+    serif;
+  letter-spacing: 0.03em;
+  line-height: 1.8;
 }
 
 #detail-info a {
