@@ -355,11 +355,10 @@ h1 {
     max-height: 42px;
   }
 
-  #detail-panel {
-    gap: 14px;
-    padding: 12px;
-    border-radius: 14px;
-  }
+ #detail-panel {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
 
   #detail-info h3 {
     margin-bottom: 14px;
