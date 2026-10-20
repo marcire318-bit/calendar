@@ -130,7 +130,9 @@
     scroll-behavior: auto !important;
     transition: none !important;
   }
-}/* カレンダー内のサムネイルを縦長にする */
+}
+
+/* カレンダー内のサムネイルを縦長にする */
 .cell .event-thumbnail-button img {
   width: 100%;
   height: 58px;
