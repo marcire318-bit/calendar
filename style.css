@@ -416,3 +416,24 @@ h1 {
   margin: 0 auto;
   object-fit: contain;
 }
+/* PC版：月表示と詳細タイトルのフォント */
+@media (min-width: 901px) {
+  .header span {
+    font-family:
+      "Yu Mincho",
+      "Hiragino Mincho ProN",
+      "Noto Serif JP",
+      serif;
+    letter-spacing: 0.06em;
+  }
+
+  #detail-info h3 {
+    font-family:
+      "Yu Mincho",
+      "Hiragino Mincho ProN",
+      "Noto Serif JP",
+      serif;
+    letter-spacing: 0.03em;
+    line-height: 1.7;
+  }
+}
