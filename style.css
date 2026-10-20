@@ -355,9 +355,13 @@ h1 {
     max-height: 42px;
   }
 
- #detail-panel {
+#detail-panel {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: start;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 14px;
 }
 
   #detail-info h3 {
