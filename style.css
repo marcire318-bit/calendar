@@ -547,3 +547,21 @@ h1 {
   }
 }
 
+/* 日付セル内のサムネイルを横並びにする */
+.cell {
+  overflow: hidden;
+}
+
+.event-thumbnail-button {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+/* 複数配信のサムネイルを横並びにするための共通設定 */
+.cell:has(.event-thumbnail-button:nth-of-type(2)) {
+  /* 複数配信の日もセルの高さを抑える */
+  min-height: 76px;
+}
+
