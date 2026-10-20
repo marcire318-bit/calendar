@@ -422,11 +422,12 @@ function renderCalendar(events) {
         eventElement.appendChild(fallback);
       }
 
+      eventElement.classList.add("event-item");
       cell.appendChild(eventElement);
     });
 
     grid.appendChild(cell);
-  }
+    }
 
   calendar.appendChild(grid);
 
