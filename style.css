@@ -338,10 +338,10 @@ h1 {
   .grid { gap: 4px; }
 
   .cell {
-    min-height: 70px;
-    padding: 3px;
-    border-radius: 7px;
-  }
+  min-height: 56px;
+  padding: 3px;
+  border-radius: 7px;
+}
 
   .day {
     margin-bottom: 5px;
@@ -353,12 +353,12 @@ h1 {
  .cell .event-thumbnail-button img {
   width: 100%;
   height: auto;
-  max-height: none;
+  max-height: 32px;
   aspect-ratio: auto;
   object-fit: contain;
   object-position: center;
 }
-
+   
 #detail-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
