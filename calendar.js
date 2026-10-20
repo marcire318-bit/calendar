@@ -1,6 +1,7 @@
 
 const API_KEY = "AIzaSyDia6SpNPAIwhOe98RDFYenub1eylyg_zM";
 const CHANNEL_ID = "UCqXxS-9x9Ha_UiH6hG4kh5Q";
+const MANUAL_EVENTS_KEY = "streamCalendarManualEvents_v1";
 
 const CACHE_KEY = "streamCalendarEvents_v2";
 const CACHE_TTL = 6 * 60 * 60 * 1000; // 6時間
@@ -233,6 +234,139 @@ async function fetchAllEvents(forceRefresh = false) {
 }
 
 /* ------------------------------
+   手動登録した配信
+------------------------------ */
+function loadManualEvents() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(MANUAL_EVENTS_KEY) || "[]"
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveManualEvents(events) {
+  localStorage.setItem(
+    MANUAL_EVENTS_KEY,
+    JSON.stringify(events)
+  );
+}
+
+function getVideoId(input) {
+  try {
+    const url = new URL(input.trim());
+
+    if (url.hostname === "youtu.be") {
+      return url.pathname.split("/").filter(Boolean)[0] || null;
+    }
+
+    if (
+      url.hostname === "www.youtube.com" ||
+      url.hostname === "youtube.com" ||
+      url.hostname === "m.youtube.com"
+    ) {
+      if (url.pathname === "/watch") {
+        return url.searchParams.get("v");
+      }
+
+      const parts = url.pathname.split("/").filter(Boolean);
+
+      if (["live", "shorts", "embed"].includes(parts[0])) {
+        return parts[1] || null;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+async function addManualEvent() {
+  const input = prompt("YouTubeの配信URLを入力してね");
+  if (!input) return;
+
+  const videoId = getVideoId(input);
+
+  if (!videoId) {
+    alert("YouTubeの動画URLを確認してね。");
+    return;
+  }
+
+  const existing = loadManualEvents();
+
+  if (existing.some(event => event.id === videoId)) {
+    alert("この配信はすでに登録されているよ。");
+    return;
+  }
+
+  const date = prompt(
+    "カレンダーに表示する日付を入力してね（例：2026-10-25）"
+  );
+
+  if (!date) return;
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    alert("日付は YYYY-MM-DD 形式で入力してね。");
+    return;
+  }
+
+  const parsedDate = new Date(`${date}T12:00:00`);
+
+  if (
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.getFullYear() !== Number(date.slice(0, 4)) ||
+    parsedDate.getMonth() + 1 !== Number(date.slice(5, 7)) ||
+    parsedDate.getDate() !== Number(date.slice(8, 10))
+  ) {
+    alert("有効な日付を入力してね。");
+    return;
+  }
+
+  try {
+    const data = await fetchYouTube(
+      apiUrl("videos", {
+        part: "snippet,liveStreamingDetails",
+        id: videoId
+      })
+    );
+
+    const video = data.items?.[0];
+
+    if (!video) {
+      alert("配信情報を取得できなかったよ。URLや公開設定を確認してね。");
+      return;
+    }
+
+    const manualEvent = {
+      ...video,
+      manualDate: date,
+      isManual: true
+    };
+
+    existing.push(manualEvent);
+    saveManualEvents(existing);
+
+    allEvents = [
+      ...allEvents.filter(event => event.id !== videoId),
+      manualEvent
+    ];
+
+    renderCalendar(allEvents);
+    showEventDetails(manualEvent);
+
+    alert("コラボ配信を登録したよ！");
+  } catch (error) {
+    console.error(error);
+    alert(
+      "配信情報を取得できなかったよ。\n" +
+      "API設定や公開状態を確認してね。"
+    );
+  }
+}
+
+/* ------------------------------
    カレンダーの状態
 ------------------------------ */
 let current = new Date();
@@ -241,6 +375,10 @@ let isLoading = false;
 let selectedEventId = null;
 
 function getEventStart(event) {
+  if (event.manualDate) {
+    return `${event.manualDate}T12:00:00`;
+  }
+
   const live = event.liveStreamingDetails;
 
   return (
@@ -252,7 +390,6 @@ function getEventStart(event) {
     null
   );
 }
-
 function getThumbnail(event) {
   return (
     event.snippet?.thumbnails?.high?.url ||
