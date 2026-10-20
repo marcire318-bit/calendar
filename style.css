@@ -157,9 +157,9 @@ h1 {
 /* 各配信の枠 */
 .cell .event-item {
   display: inline-block;
-  width: 100%;
+  width: calc(33.333% - 4px);
   min-width: 0;
-  margin: 3px 0;
+  margin: 3px 1px;
   vertical-align: top;
 }
 
@@ -191,7 +191,7 @@ h1 {
   height: 58px;
   min-height: 0;
   max-height: 58px;
-  aspect-ratio: auto;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
   object-position: center center;
   transition: filter 0.2s;
@@ -355,11 +355,6 @@ h1 {
   }
 
   .cell .event-item { margin: 2px 0; }
-
-  .cell .event-item:has(~ .event-item),
-  .cell .event-item ~ .event-item {
-    width: calc(50% - 2px);
-  }
 
   .cell .event-thumbnail-button img {
     height: 28px;
