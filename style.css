@@ -5,8 +5,8 @@
 :root {
   --night: #071426;
   --night-blue: #0c2038;
-  --panel: rgba(12, 36, 63, 0.62);
-  --panel-light: rgba(35, 66, 91, 0.55);
+  --panel: rgba(12, 36, 63, 0.42);
+  --panel-light: rgba(35, 66, 91, 0.38);
   --cyan: #8fe8f0;
   --cyan-bright: #b7f7ff;
   --silver: #c6d8e8;
