@@ -1,4 +1,4 @@
-const API_KEY = "AIzaSyCmPoAEOooOsvgJo9724J3NooRC13lS8f4";
+const API_KEY = "";
 const CHANNEL_ID = "UCqXxS-9x9Ha_UiH6hG4kh5Q";
 
 const CACHE_KEY = "streamCalendarEvents_v2";
