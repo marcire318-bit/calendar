@@ -121,3 +121,28 @@
     font-size: 16px;
   }
 }
+
+/* 動きを減らす設定を尊重 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+
+/* カレンダー内のサムネイルを縦長にする */
+.cell .event-thumbnail-button img {
+  width: 100%;
+  height: 58px;
+  max-height: 58px;
+  aspect-ratio: auto;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* スマホでは少し小さめ */
+@media (max-width: 700px) {
+  .cell .event-thumbnail-button img {
+    height: 42px;
+    max-height: 42px;
+  }
+}
+
+  
