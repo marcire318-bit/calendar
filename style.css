@@ -1,108 +1,313 @@
+
+:root {
+  --night: #071426;
+  --night-blue: #0c2038;
+  --panel: rgba(18, 42, 65, 0.78);
+  --panel-light: rgba(35, 66, 91, 0.72);
+  --cyan: #8fe8f0;
+  --cyan-bright: #b7f7ff;
+  --silver: #c6d8e8;
+  --muted: #a5bdcf;
+  --line: rgba(157, 209, 229, 0.22);
+  --gold: #d8bd83;
+}
+
+/* 基本 */
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
-  background: #f0faff; /* 透明感のある水色 */
-  color: #222;
   margin: 0;
-  padding: 20px;
+  padding: 24px;
+  min-height: 100vh;
+  color: #e7f4ff;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(48, 105, 145, 0.32), transparent 48%),
+    radial-gradient(ellipse at 0% 100%, rgba(23, 103, 126, 0.2), transparent 42%),
+    linear-gradient(160deg, #071426 0%, #0a1b30 52%, #06111f 100%);
+  background-attachment: fixed;
 }
 
 /* タイトル */
 h1 {
   text-align: center;
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: #64C8F0; /* ライバーカラー */
+  font-size: clamp(24px, 3vw, 34px);
+  margin: 12px 0 28px;
+  color: var(--cyan-bright);
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 18px rgba(113, 224, 241, 0.3);
 }
 
-/* 月移動ボタン */
+/* カレンダー外枠 */
+#calendar {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* 月移動 */
 .header {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.header span {
+  min-width: 130px;
+  text-align: center;
+  color: #effaff;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
 .header button {
-  background: #64C8F0;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 15px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(143, 232, 240, 0.4);
+  border-radius: 50%;
+  background: rgba(80, 145, 170, 0.13);
+  color: var(--cyan-bright);
+  font-size: 20px;
   cursor: pointer;
-  color: #fff;
-  transition: 0.2s;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 .header button:hover {
-  background: #4bb8e0;
+  background: rgba(105, 211, 224, 0.2);
+  box-shadow: 0 0 16px rgba(110, 222, 237, 0.18);
+  transform: translateY(-1px);
 }
 
-/* カレンダー本体 */
+/* 曜日・日付グリッド */
 .grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 9px;
 }
 
-/* セル */
+/* 日付セル */
 .cell {
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 6px;
-  min-height: 80px;
-  box-shadow: 0 2px 6px rgba(100, 200, 240, 0.2);
-  border: 1px solid #d6eef8;
+  min-width: 0;
+  min-height: 100px;
+  padding: 9px;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(8, 24, 42, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.cell:hover {
+  border-color: rgba(143, 232, 240, 0.42);
+  background: rgba(21, 48, 69, 0.78);
 }
 
 /* 日付 */
 .day {
+  margin-bottom: 8px;
+  color: var(--silver);
+  font-size: 14px;
   font-weight: 600;
-  font-size: 15px;
-  color: #64C8F0;
-  margin-bottom: 6px;
 }
 
 /* 今日 */
 .today {
-  border: 2px solid #64C8F0;
-  box-shadow: 0 0 8px rgba(100, 200, 240, 0.4);
+  border-color: var(--cyan);
+  box-shadow:
+    0 0 0 1px rgba(143, 232, 240, 0.12),
+    0 0 18px rgba(89, 211, 229, 0.1);
 }
 
-/* イベント共通 */
+.today .day {
+  color: var(--cyan-bright);
+}
+
+/* 配信イベント */
 .event {
-  margin: 4px 0;
-  font-size: 13px;
-  line-height: 1.3;
+  margin: 5px 0;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
-/* リンク */
 .event a {
+  display: block;
+  padding: 6px 7px;
+  border: 1px solid rgba(143, 232, 240, 0.16);
+  border-radius: 7px;
+  background: rgba(75, 147, 171, 0.17);
+  color: #dffaff;
   text-decoration: none;
-  color: #fff;
-  background: #64C8F0;
-  padding: 4px 6px;
-  border-radius: 6px;
-  display: inline-block;
   font-weight: 500;
+  transition: background 0.2s, border-color 0.2s;
 }
 
-/* ライブ中（濃い水色で強調） */
+.event a:hover {
+  background: rgba(95, 190, 207, 0.25);
+  border-color: rgba(143, 232, 240, 0.55);
+}
+
+/* ライブ中 */
 .event.live a {
-  background: #4bb8e0;
+  background: rgba(27, 139, 147, 0.3);
+  border-color: rgba(143, 232, 240, 0.55);
+  color: #c7ffff;
   font-weight: 700;
 }
 
-/* アーカイブ（落ち着いた水色） */
+/* アーカイブ */
 .event.archive a {
-  background: #e6f7ff;
-  color: #2a7fa3;
+  background: rgba(147, 169, 191, 0.11);
+  border-color: rgba(198, 216, 232, 0.16);
+  color: #c6d8e8;
 }
 
-/* 予定（淡い水色） */
+/* 配信予定 */
 .event.upcoming a {
-  background: #dff5ff;
-  color: #64C8F0;
+  background: rgba(78, 139, 181, 0.17);
+  color: #b9e8ff;
+}
+
+/* 読み込み状況・エラー */
+#calendar-status {
+  padding: 12px;
+  color: var(--muted);
+  text-align: center;
+  white-space: pre-line;
+}
+
+/* 詳細パネル */
+#detail-thumbnail,
+#detail-info {
+  width: min(100%, 1200px);
+  margin: 18px auto 0;
+}
+
+#detail-thumbnail img {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+#detail-info {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  overflow-wrap: anywhere;
+}
+
+#detail-info h3 {
+  margin-top: 0;
+  color: #e7f8ff;
+  line-height: 1.6;
+}
+
+#detail-info a {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 1px solid rgba(143, 232, 240, 0.45);
+  border-radius: 9px;
+  background: rgba(80, 160, 180, 0.18);
+  color: var(--cyan-bright);
+  text-decoration: none;
+}
+
+#detail-info a:hover {
+  background: rgba(80, 190, 205, 0.28);
+}
+
+/* スマートフォン */
+@media (max-width: 700px) {
+  body {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 23px;
+    margin: 12px 0 20px;
+    letter-spacing: 0.08em;
+  }
+
+  #calendar {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .header {
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .header span {
+    min-width: 110px;
+    font-size: 18px;
+  }
+
+  .header button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .grid {
+    gap: 4px;
+  }
+
+  .cell {
+    min-height: 70px;
+    padding: 4px;
+    border-radius: 7px;
+  }
+
+  .day {
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+
+  .event {
+    margin: 3px 0;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .event a {
+    padding: 4px;
+    border-radius: 5px;
+  }
+
+  #detail-thumbnail img {
+    max-width: 100%;
+  }
+
+  #detail-info {
+    padding: 13px;
+  }
+}
+
+/* 動きを減らす設定を尊重 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
 }
