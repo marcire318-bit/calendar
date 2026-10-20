@@ -466,7 +466,9 @@ function renderCalendar(events) {
   refresh.disabled = isLoading;
   const addButton = document.createElement("button");
   addButton.type = "button";
+  addButton.className = "add-button";
   addButton.textContent = "＋ 追加";
+  addButton.setAttribute("aria-label", "コラボ配信を追加");
   addButton.addEventListener("click", addManualEvent);
 
   prev.addEventListener("click", () => {
