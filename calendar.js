@@ -667,3 +667,12 @@ async function init(forceRefresh = false) {
 }
 
 init();
+/* 配信追加ボタン */
+.add-button {
+  white-space: nowrap;
+  min-width: 76px;
+  padding: 7px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
