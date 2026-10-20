@@ -296,7 +296,7 @@ h1 {
 #detail-info a:hover { background: rgba(80, 190, 205, 0.28); }
 
 /* スマートフォン */
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   body { padding: 12px; }
 
   h1 {
