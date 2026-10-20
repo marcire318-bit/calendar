@@ -24,9 +24,11 @@ body {
   color: #e7f4ff;
   font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(48, 105, 145, 0.32), transparent 48%),
-    radial-gradient(ellipse at 0% 100%, rgba(23, 103, 126, 0.2), transparent 42%),
-    linear-gradient(160deg, #071426 0%, #0a1b30 52%, #06111f 100%);
+    linear-gradient(
+      rgba(4, 17, 38, 0.28),
+      rgba(4, 17, 38, 0.45)
+    ),
+    url("./bg_main.png") center center / cover no-repeat;
   background-attachment: fixed;
 }
 
