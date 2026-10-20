@@ -464,6 +464,10 @@ function renderCalendar(events) {
   refresh.textContent = "↻ 更新";
   refresh.setAttribute("aria-label", "配信情報を手動更新");
   refresh.disabled = isLoading;
+  const addButton = document.createElement("button");
+  addButton.type = "button";
+  addButton.textContent = "＋ 追加";
+  addButton.addEventListener("click", addManualEvent);
 
   prev.addEventListener("click", () => {
     current = new Date(year, month - 1, 1);
@@ -479,7 +483,7 @@ function renderCalendar(events) {
     init(true);
   });
 
-  header.append(prev, label, next, refresh);
+  header.append(prev, label, next, refresh, addButton);
   calendar.appendChild(header);
 
   /* 日付グリッド */
