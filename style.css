@@ -452,9 +452,20 @@ h1 {
 /* 配信追加ボタン */
 .add-button {
   white-space: nowrap;
-  min-width: 76px;
-  padding: 7px 12px;
-  font-size: 14px;
+  min-width: 0;
+  padding: 7px 10px;
+  font-size: 12px;
   line-height: 1.4;
   flex-shrink: 0;
+
+  color: #c8f4ff;
+  background: rgba(35, 66, 91, 0.45);
+  border: 1px solid rgba(120, 210, 240, 0.4);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.add-button:hover {
+  background: rgba(70, 130, 160, 0.55);
 }
