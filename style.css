@@ -439,3 +439,13 @@ h1 {
     line-height: 1.7;
   }
 }
+/* スマホ版：ロゴを少し小さく */
+@media (max-width: 900px) {
+  .site-logo img {
+    width: min(100%, 340px);
+  }
+
+  .site-logo {
+    margin: 8px 0 14px;
+  }
+}
