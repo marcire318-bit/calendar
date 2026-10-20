@@ -640,9 +640,24 @@ async function init(forceRefresh = false) {
   }
 
   try {
-    allEvents = await fetchAllEvents(forceRefresh);
+    
+allEvents = await fetchAllEvents(forceRefresh);
 
-    renderCalendar(allEvents);
+// 保存済みの手動登録配信を合流させる
+const manualEvents = loadManualEvents();
+
+const eventMap = new Map(
+  allEvents.map(event => [event.id, event])
+);
+
+manualEvents.forEach(event => {
+  eventMap.set(event.id, event);
+});
+
+allEvents = [...eventMap.values()];
+
+renderCalendar(allEvents);
+
 
     const status = document.getElementById("calendar-status");
     if (status) status.remove();
