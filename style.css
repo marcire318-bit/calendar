@@ -1,3 +1,4 @@
+
 /* ========================================
    配信カレンダー CSS
    ======================================== */
@@ -15,7 +16,9 @@
   --gold: #d8bd83;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -32,17 +35,29 @@ body {
   background-attachment: fixed;
 }
 
-h1 {
-  margin: 12px 0 28px;
-  color: var(--cyan-bright);
-  font-size: clamp(24px, 3vw, 34px);
-  font-weight: 700;
-  letter-spacing: 0.14em;
+/* ========================================
+   ロゴ
+   ======================================== */
+
+.site-logo {
+  margin: 12px 0 20px;
   text-align: center;
-  text-shadow: 0 0 18px rgba(113, 224, 241, 0.3);
+  line-height: 0;
 }
 
-/* PC：カレンダー右、詳細パネル左 */
+.site-logo img {
+  display: block;
+  width: min(100%, 420px);
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+/* ========================================
+   メインレイアウト
+   PC：詳細パネル左、カレンダー右
+   ======================================== */
+
 #main-layout {
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
@@ -62,7 +77,10 @@ h1 {
   grid-row: 1;
 }
 
-/* カレンダー */
+/* ========================================
+   カレンダー本体
+   ======================================== */
+
 #calendar {
   width: 100%;
   min-width: 0;
@@ -71,12 +89,17 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--panel);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
 
-/* 月移動・更新ボタン */
+/* ========================================
+   月移動・更新・追加ボタン
+   ======================================== */
+
 .header {
   display: flex;
   flex-wrap: wrap;
@@ -95,16 +118,26 @@ h1 {
   text-align: center;
 }
 
+/* 月移動ボタン */
+
 .header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   width: 40px;
   height: 40px;
+  padding: 0;
   border: 1px solid rgba(143, 232, 240, 0.4);
   border-radius: 50%;
   background: rgba(80, 145, 170, 0.13);
   color: var(--cyan-bright);
   font-size: 20px;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 
 .header button:hover {
@@ -113,12 +146,14 @@ h1 {
   transform: translateY(-1px);
 }
 
+/* 更新ボタン */
+
 .header .refresh-button {
   width: auto;
-  height: auto;
-  padding: 9px 13px;
+  height: 40px;
+  padding: 7px 12px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -127,7 +162,40 @@ h1 {
   cursor: wait;
 }
 
-/* カレンダーの日付グリッド */
+/* 追加ボタン：更新ボタンと統一 */
+
+#calendar .header button.add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 3px;
+
+  width: auto;
+  min-width: 64px;
+  height: 40px;
+  padding: 6px 8px;
+
+  border: 1px solid rgba(143, 232, 240, 0.4);
+  border-radius: 999px;
+  background: rgba(80, 145, 170, 0.13);
+  color: var(--cyan-bright);
+  box-shadow: none;
+
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+#calendar .header button.add-button:hover {
+  background: rgba(105, 211, 224, 0.2);
+  box-shadow: 0 0 16px rgba(110, 222, 237, 0.18);
+}
+
+/* ========================================
+   カレンダーの日付グリッド
+   ======================================== */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -161,12 +229,19 @@ h1 {
 
 .today {
   border-color: var(--cyan);
-  box-shadow: 0 0 0 1px rgba(143, 232, 240, 0.12), 0 0 18px rgba(89, 211, 229, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(143, 232, 240, 0.12),
+    0 0 18px rgba(89, 211, 229, 0.1);
 }
 
-.today .day { color: var(--cyan-bright); }
+.today .day {
+  color: var(--cyan-bright);
+}
 
-/* 各配信の枠 */
+/* ========================================
+   配信サムネイル
+   ======================================== */
+
 .cell .event-item {
   display: block;
   width: 100%;
@@ -175,7 +250,6 @@ h1 {
   vertical-align: top;
 }
 
-/* カレンダー内のサムネイルは中央を帯状に表示 */
 .cell .event-thumbnail-button {
   display: block;
   width: 100%;
@@ -235,7 +309,10 @@ h1 {
   cursor: pointer;
 }
 
-/* 読み込み状況・エラー */
+/* ========================================
+   読み込み状況・エラー
+   ======================================== */
+
 #calendar-status {
   padding: 12px;
   color: var(--muted);
@@ -243,7 +320,10 @@ h1 {
   white-space: pre-line;
 }
 
-/* 詳細パネル */
+/* ========================================
+   詳細パネル
+   ======================================== */
+
 #detail-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -307,118 +387,14 @@ h1 {
   text-decoration: none;
 }
 
-#detail-info a:hover { background: rgba(80, 190, 205, 0.28); }
-
-/* スマートフォン */
-@media (max-width: 900px) {
-  body { padding: 12px; }
-
-  h1 {
-    margin: 12px 0 20px;
-    font-size: 23px;
-    letter-spacing: 0.08em;
-  }
-
-  #main-layout {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-   
-  #calendar {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  #detail-panel {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  #calendar {
-    padding: 10px;
-    border-radius: 14px;
-  }
-
-  .header {
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
-  .header span {
-    min-width: 110px;
-    font-size: 18px;
-  }
-
-  .header button {
-    width: 36px;
-    height: 36px;
-  }
-
-  .header .refresh-button {
-    padding: 7px 10px;
-    font-size: 12px;
-  }
-
- .grid {
-  gap: 3px;
+#detail-info a:hover {
+  background: rgba(80, 190, 205, 0.28);
 }
 
-.day {
-  margin-bottom: 3px;
-  font-size: 11px;
-}
+/* ========================================
+   PC版フォント
+   ======================================== */
 
-.cell .event-item {
-  margin: 1px 0;
-}
-   
- .cell .event-thumbnail-button img {
-  width: 100%;
-  height: auto;
-  max-height: 32px;
-  aspect-ratio: auto;
-  object-fit: contain;
-  object-position: center;
-}
-   
-#detail-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: start;
-  gap: 14px;
-  padding: 12px;
-  border-radius: 14px;
-}
-
-  #detail-info h3 {
-    margin-bottom: 14px;
-    font-size: 16px;
-  }
-}
-
-/* 動きを減らす設定を尊重 */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition: none !important;
-  }
-}
-/* ロゴ */
-.site-logo {
-  margin: 12px 0 20px;
-  text-align: center;
-  line-height: 0;
-}
-
-.site-logo img {
-  display: block;
-  width: min(100%, 420px);
-  height: auto;
-  margin: 0 auto;
-  object-fit: contain;
-}
-/* PC版：月表示と詳細タイトルのフォント */
 @media (min-width: 901px) {
   .header span {
     font-family:
@@ -439,59 +415,118 @@ h1 {
     line-height: 1.7;
   }
 }
-/* スマホ版：ロゴを少し小さく */
+
+/* ========================================
+   スマートフォン
+   カレンダー上、詳細パネル下
+   ======================================== */
+
 @media (max-width: 900px) {
-  .site-logo img {
-    width: min(100%, 340px);
+  body {
+    padding: 12px;
   }
 
   .site-logo {
     margin: 8px 0 14px;
   }
+
+  .site-logo img {
+    width: min(100%, 340px);
+  }
+
+  #main-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  #calendar {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  #detail-panel {
+    grid-column: 1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .header {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .header span {
+    min-width: 110px;
+    font-size: 18px;
+  }
+
+  .header button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header .refresh-button {
+    width: auto;
+    height: 36px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  #calendar .header button.add-button {
+    min-width: 64px;
+    height: 36px;
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .grid {
+    gap: 3px;
+  }
+
+  .cell {
+    min-height: 76px;
+  }
+
+  .day {
+    margin-bottom: 3px;
+    font-size: 11px;
+  }
+
+  .cell .event-item {
+    margin: 1px 0;
+  }
+
+  .cell .event-thumbnail-button img {
+    width: 100%;
+    height: auto;
+    max-height: 32px;
+    aspect-ratio: auto;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  #detail-info h3 {
+    margin-bottom: 14px;
+    font-size: 16px;
+  }
 }
-/* 配信追加ボタン */
-.add-button {
-  white-space: nowrap;
-  min-width: 0;
-  padding: 7px 10px;
-  font-size: 12px;
-  line-height: 1.4;
-  flex-shrink: 0;
 
-  color: #c8f4ff;
-  background: rgba(35, 66, 91, 0.45);
-  border: 1px solid rgba(120, 210, 240, 0.4);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
+/* ========================================
+   動きを減らす設定を尊重
+   ======================================== */
 
-.add-button:hover {
-  background: rgba(70, 130, 160, 0.55);
-}
-/* 追加ボタンの見た目を更新ボタンに揃える */
-#calendar .header button.add-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-
-  width: auto;
-  min-width: 68px;
-  height: 42px;
-  padding: 6px 9px;
-   
-  white-space: nowrap;
-  font-size: 12px;
-  line-height: 1.4;
-
-  border: 1px solid rgba(120, 210, 240, 0.4);
-  border-radius: 999px;
-  background: rgba(35, 66, 91, 0.45);
-  color: #c8f4ff;
-  box-shadow: none;
-}
-
-#calendar .header button.add-button:hover {
-  background: rgba(70, 130, 160, 0.55);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
 }
