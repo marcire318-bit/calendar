@@ -547,48 +547,53 @@ h1 {
   }
 }
 
-/* 日付セル内のサムネイルを横並びにする */
+/* 日付セル内の配信一覧 */
 .cell {
+  min-width: 0;
   overflow: hidden;
 }
 
-.event-thumbnail-button {
-  display: inline-block;
-  width: 100%;
-  max-width: 100%;
-  vertical-align: top;
-}
-
-/* 複数配信のサムネイルを横並びにするための共通設定 */
-.cell:has(.event-thumbnail-button:nth-of-type(2)) {
-  /* 複数配信の日もセルの高さを抑える */
-  min-height: 76px;
-}
-
-/* 配信一覧のレイアウト */
-.cell {
-  overflow: hidden;
-}
-
+/* 配信が1つの日は横幅いっぱい */
 .cell .event-item {
   display: inline-block;
   width: 100%;
   min-width: 0;
+  margin: 3px 0;
   vertical-align: top;
 }
 
-.cell .event-item:has(~ .event-item) {
+/* 2つ以上ある日は配信を2列にする */
+.cell .event-item:has(~ .event-item),
+.cell .event-item ~ .event-item {
   width: calc(50% - 3px);
 }
 
-.cell .event-item:has(~ .event-item) .event-thumbnail-button,
-.cell .event-item ~ .event-item .event-thumbnail-button {
+/* サムネイルは各列の幅に合わせる */
+.cell .event-item .event-thumbnail-button,
+.cell .event-item .event-fallback-button {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
+/* サムネイル画像 */
 .cell .event-item .event-thumbnail-button img {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
+
+/* スマホでも複数配信は2列 */
+@media (max-width: 700px) {
+  .cell .event-item:has(~ .event-item),
+  .cell .event-item ~ .event-item {
+    width: calc(50% - 3px);
+  }
+}
+
 
