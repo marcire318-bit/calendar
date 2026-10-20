@@ -1,3 +1,4 @@
+
 const API_KEY = "AIzaSyDia6SpNPAIwhOe98RDFYenub1eylyg_zM";
 const CHANNEL_ID = "UCqXxS-9x9Ha_UiH6hG4kh5Q";
 
@@ -36,7 +37,6 @@ function apiUrl(resource, params) {
 
 /* ------------------------------
    配信予定・ライブ中
-   Search APIは最大2回使用
 ------------------------------ */
 async function fetchUpcomingAndLive() {
   const searches = [
@@ -79,9 +79,7 @@ async function fetchUpcomingAndLive() {
   const uniqueIds = [...new Set(ids)];
 
   if (!uniqueIds.length) {
-    if (errors.length) {
-      throw new Error(errors.join("\n"));
-    }
+    if (errors.length) throw new Error(errors.join("\n"));
     return [];
   }
 
@@ -97,7 +95,6 @@ async function fetchUpcomingAndLive() {
 
 /* ------------------------------
    アーカイブ
-   Search APIを使わずアップロード一覧から取得
 ------------------------------ */
 async function fetchArchives() {
   const channelRes = await fetchYouTube(
@@ -110,9 +107,7 @@ async function fetchArchives() {
   const playlistId =
     channelRes.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
 
-  if (!playlistId) {
-    return [];
-  }
+  if (!playlistId) return [];
 
   const playlistRes = await fetchYouTube(
     apiUrl("playlistItems", {
@@ -126,9 +121,7 @@ async function fetchArchives() {
     .map(item => item?.contentDetails?.videoId)
     .filter(Boolean);
 
-  if (!ids.length) {
-    return [];
-  }
+  if (!ids.length) return [];
 
   const detailRes = await fetchYouTube(
     apiUrl("videos", {
@@ -139,39 +132,38 @@ async function fetchArchives() {
 
   return (detailRes.items || []).map(video => {
     const live = video.liveStreamingDetails;
-
     const start =
-      (live && (live.actualEndTime || live.actualStartTime)) ||
+      live?.actualEndTime ||
+      live?.actualStartTime ||
       video.snippet?.publishedAt;
 
-    return {
-      ...video,
-      archiveStart: start
-    };
+    return { ...video, archiveStart: start };
   });
 }
 
 /* ------------------------------
    データ取得とキャッシュ
-   6時間は保存済みデータを使用
+   forceRefresh が true ならキャッシュを使わない
 ------------------------------ */
-async function fetchAllEvents() {
-  try {
-    const cached = localStorage.getItem(CACHE_KEY);
+async function fetchAllEvents(forceRefresh = false) {
+  if (!forceRefresh) {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
 
-    if (cached) {
-      const parsed = JSON.parse(cached);
+      if (cached) {
+        const parsed = JSON.parse(cached);
 
-      if (
-        parsed.savedAt &&
-        Date.now() - parsed.savedAt < CACHE_TTL &&
-        Array.isArray(parsed.events)
-      ) {
-        return parsed.events;
+        if (
+          parsed.savedAt &&
+          Date.now() - parsed.savedAt < CACHE_TTL &&
+          Array.isArray(parsed.events)
+        ) {
+          return parsed.events;
+        }
       }
+    } catch (error) {
+      console.warn("保存済みデータを読み込めませんでした。", error);
     }
-  } catch (error) {
-    console.warn("保存済みデータを読み込めませんでした。", error);
   }
 
   const [upcomingResult, archiveResult] =
@@ -191,26 +183,18 @@ async function fetchAllEvents() {
       : [];
 
   if (upcomingResult.status === "rejected") {
-    console.error(
-      "配信予定・ライブ中の取得に失敗:",
-      upcomingResult.reason
-    );
+    console.error("配信予定・ライブ中の取得に失敗:", upcomingResult.reason);
   }
 
   if (archiveResult.status === "rejected") {
-    console.error(
-      "アーカイブの取得に失敗:",
-      archiveResult.reason
-    );
+    console.error("アーカイブの取得に失敗:", archiveResult.reason);
   }
 
-  // 同じ動画が重複しないようにまとめる
   const eventMap = new Map();
 
   [...upcoming, ...archives].forEach(event => {
     if (event?.id) {
       const existing = eventMap.get(event.id);
-
       eventMap.set(
         event.id,
         existing ? { ...existing, ...event } : event
@@ -224,15 +208,11 @@ async function fetchAllEvents() {
     const messages = [];
 
     if (upcomingResult.status === "rejected") {
-      messages.push(
-        `配信予定の取得: ${upcomingResult.reason.message}`
-      );
+      messages.push(`配信予定の取得: ${upcomingResult.reason.message}`);
     }
 
     if (archiveResult.status === "rejected") {
-      messages.push(
-        `アーカイブの取得: ${archiveResult.reason.message}`
-      );
+      messages.push(`アーカイブの取得: ${archiveResult.reason.message}`);
     }
 
     throw new Error(
@@ -243,10 +223,7 @@ async function fetchAllEvents() {
   try {
     localStorage.setItem(
       CACHE_KEY,
-      JSON.stringify({
-        savedAt: Date.now(),
-        events
-      })
+      JSON.stringify({ savedAt: Date.now(), events })
     );
   } catch (error) {
     console.warn("データを保存できませんでした。", error);
@@ -256,11 +233,12 @@ async function fetchAllEvents() {
 }
 
 /* ------------------------------
-   カレンダー描画
+   カレンダーの状態
 ------------------------------ */
 let current = new Date();
 let allEvents = [];
 let isLoading = false;
+let selectedEventId = null;
 
 function getEventStart(event) {
   const live = event.liveStreamingDetails;
@@ -273,6 +251,24 @@ function getEventStart(event) {
     event.snippet?.publishedAt ||
     null
   );
+}
+
+function getThumbnail(event) {
+  return (
+    event.snippet?.thumbnails?.high?.url ||
+    event.snippet?.thumbnails?.medium?.url ||
+    event.snippet?.thumbnails?.default?.url ||
+    ""
+  );
+}
+
+function getEventType(event) {
+  const live = event.liveStreamingDetails;
+
+  if (live?.actualStartTime && !live?.actualEndTime) return "live";
+  if (event.archiveStart || live?.actualEndTime) return "archive";
+
+  return "upcoming";
 }
 
 function showStatus(message, isError = false) {
@@ -288,9 +284,12 @@ function showStatus(message, isError = false) {
   }
 
   status.textContent = message;
-  status.style.color = isError ? "#b42318" : "";
+  status.style.color = isError ? "#ffaaaa" : "";
 }
 
+/* ------------------------------
+   カレンダー描画
+------------------------------ */
 function renderCalendar(events) {
   const calendar = document.getElementById("calendar");
 
@@ -305,7 +304,7 @@ function renderCalendar(events) {
 
   calendar.innerHTML = "";
 
-  /* 月移動ボタン */
+  /* 月移動と手動更新のボタン */
   const header = document.createElement("div");
   header.className = "header";
 
@@ -322,25 +321,28 @@ function renderCalendar(events) {
   next.textContent = "→";
   next.setAttribute("aria-label", "次の月");
 
+  const refresh = document.createElement("button");
+  refresh.type = "button";
+  refresh.className = "refresh-button";
+  refresh.textContent = "↻ 更新";
+  refresh.setAttribute("aria-label", "配信情報を手動更新");
+  refresh.disabled = isLoading;
+
   prev.addEventListener("click", () => {
-    current = new Date(
-      current.getFullYear(),
-      current.getMonth() - 1,
-      1
-    );
+    current = new Date(year, month - 1, 1);
     renderCalendar(allEvents);
   });
 
   next.addEventListener("click", () => {
-    current = new Date(
-      current.getFullYear(),
-      current.getMonth() + 1,
-      1
-    );
+    current = new Date(year, month + 1, 1);
     renderCalendar(allEvents);
   });
 
-  header.append(prev, label, next);
+  refresh.addEventListener("click", () => {
+    init(true);
+  });
+
+  header.append(prev, label, next, refresh);
   calendar.appendChild(header);
 
   /* 日付グリッド */
@@ -361,47 +363,64 @@ function renderCalendar(events) {
     dayLabel.textContent = day;
     cell.appendChild(dayLabel);
 
-    const dayEvents = events.filter(event => {
-      const start = getEventStart(event);
-
-      return (
-        start &&
-        new Date(start).toDateString() === date.toDateString()
+    const dayEvents = events
+      .filter(event => {
+        const start = getEventStart(event);
+        return start &&
+          new Date(start).toDateString() === date.toDateString();
+      })
+      .sort((a, b) =>
+        new Date(getEventStart(a)) - new Date(getEventStart(b))
       );
-    });
 
     dayEvents.forEach(event => {
-      const live = event.liveStreamingDetails;
-
-      const isLive = Boolean(
-        live?.actualStartTime && !live?.actualEndTime
-      );
-
-      const isArchive = Boolean(
-        event.archiveStart || live?.actualEndTime
-      );
-
       const eventElement = document.createElement("div");
+      eventElement.className = `event ${getEventType(event)}`;
 
-      eventElement.className =
-        `event ${isLive ? "live" : isArchive ? "archive" : "upcoming"}`;
+      const thumbnail = getThumbnail(event);
 
-      const link = document.createElement("a");
-      link.href =
-        `https://www.youtube.com/watch?v=${encodeURIComponent(event.id)}`;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = event.snippet?.title || "タイトル不明";
+      if (thumbnail) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "event-thumbnail-button";
+        button.setAttribute(
+          "aria-label",
+          event.snippet?.title || "配信の詳細を表示"
+        );
 
-      eventElement.appendChild(link);
+        const image = document.createElement("img");
+        image.src = thumbnail;
+        image.alt = event.snippet?.title || "配信サムネイル";
+        image.loading = "lazy";
 
-      eventElement.addEventListener("mouseenter", () => {
-        showEventDetails(event);
-      });
+        button.appendChild(image);
 
-      eventElement.addEventListener("focusin", () => {
-        showEventDetails(event);
-      });
+        // PC：マウスを乗せると詳細を表示
+        button.addEventListener("mouseenter", () => {
+          showEventDetails(event);
+        });
+
+        // キーボード操作にも対応
+        button.addEventListener("focus", () => {
+          showEventDetails(event);
+        });
+
+        // スマホ：タップで詳細を表示
+        button.addEventListener("click", () => {
+          showEventDetails(event);
+        });
+
+        eventElement.appendChild(button);
+      } else {
+        const fallback = document.createElement("button");
+        fallback.type = "button";
+        fallback.className = "event-fallback-button";
+        fallback.textContent = "サムネイルなし";
+        fallback.addEventListener("click", () => {
+          showEventDetails(event);
+        });
+        eventElement.appendChild(fallback);
+      }
 
       cell.appendChild(eventElement);
     });
@@ -410,6 +429,13 @@ function renderCalendar(events) {
   }
 
   calendar.appendChild(grid);
+
+  // 月移動後も選択中の配信が存在すれば詳細を維持
+  const selected = events.find(event => event.id === selectedEventId);
+
+  if (selected) {
+    showEventDetails(selected);
+  }
 }
 
 /* ------------------------------
@@ -424,18 +450,17 @@ function showEventDetails(event) {
 
   if (!thumbnailContainer || !infoContainer) return;
 
+  selectedEventId = event.id;
   thumbnailContainer.innerHTML = "";
   infoContainer.innerHTML = "";
 
-  const thumb =
-    event.snippet?.thumbnails?.high?.url ||
-    event.snippet?.thumbnails?.medium?.url ||
-    event.snippet?.thumbnails?.default?.url;
+  const thumb = getThumbnail(event);
 
   if (thumb) {
     const image = document.createElement("img");
     image.src = thumb;
-    image.alt = "";
+    image.alt = event.snippet?.title || "配信サムネイル";
+    image.loading = "lazy";
     thumbnailContainer.appendChild(image);
   }
 
@@ -453,16 +478,25 @@ function showEventDetails(event) {
 }
 
 /* ------------------------------
-   初期化
+   初期化・手動更新
 ------------------------------ */
-async function init() {
+async function init(forceRefresh = false) {
   if (isLoading) return;
 
   isLoading = true;
-  showStatus("配信情報を読み込み中…");
+  showStatus(
+    forceRefresh ? "最新の配信情報を取得中…" : "配信情報を読み込み中…"
+  );
+
+  // 更新中はボタンを押せないようにする
+  const oldRefresh = document.querySelector(".refresh-button");
+  if (oldRefresh) {
+    oldRefresh.disabled = true;
+    oldRefresh.textContent = "更新中…";
+  }
 
   try {
-    allEvents = await fetchAllEvents();
+    allEvents = await fetchAllEvents(forceRefresh);
 
     renderCalendar(allEvents);
 
@@ -479,6 +513,12 @@ async function init() {
 
   } finally {
     isLoading = false;
+
+    const refresh = document.querySelector(".refresh-button");
+    if (refresh) {
+      refresh.disabled = false;
+      refresh.textContent = "↻ 更新";
+    }
   }
 }
 
