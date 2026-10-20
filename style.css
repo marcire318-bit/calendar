@@ -469,3 +469,29 @@ h1 {
 .add-button:hover {
   background: rgba(70, 130, 160, 0.55);
 }
+/* 追加ボタンの見た目を更新ボタンに揃える */
+#calendar .header button.add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  width: auto;
+  min-width: 76px;
+  height: 44px;
+  padding: 7px 12px;
+
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.4;
+
+  border: 1px solid rgba(120, 210, 240, 0.4);
+  border-radius: 999px;
+  background: rgba(35, 66, 91, 0.45);
+  color: #c8f4ff;
+  box-shadow: none;
+}
+
+#calendar .header button.add-button:hover {
+  background: rgba(70, 130, 160, 0.55);
+}
