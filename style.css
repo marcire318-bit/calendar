@@ -350,10 +350,14 @@ h1 {
 
   .cell .event-item { margin: 2px 0; }
 
-  .cell .event-thumbnail-button img {
-    height: 42px;
-    max-height: 42px;
-  }
+ .cell .event-thumbnail-button img {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
 
 #detail-panel {
   display: grid;
