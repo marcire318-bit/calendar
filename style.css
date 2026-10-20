@@ -321,7 +321,16 @@ h1 {
     grid-template-columns: minmax(0, 1fr);
     gap: 14px;
   }
+   
+  #calendar {
+    grid-column: 1;
+    grid-row: 1;
+  }
 
+  #detail-panel {
+    grid-column: 1;
+    grid-row: 2;
+  }
   #calendar {
     padding: 10px;
     border-radius: 14px;
@@ -402,7 +411,7 @@ h1 {
 
 .site-logo img {
   display: block;
-  width: min(100%, 560px);
+  width: min(100%, 420px);
   height: auto;
   margin: 0 auto;
   object-fit: contain;
