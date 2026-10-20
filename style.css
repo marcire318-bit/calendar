@@ -565,3 +565,31 @@ h1 {
   min-height: 76px;
 }
 
+/* 複数配信の日はサムネイルを横並びにする */
+.cell:has(.event-thumbnail-button:nth-of-type(1)) {
+  min-height: 76px;
+}
+
+.cell .event-thumbnail-button {
+  width: 100%;
+  max-width: 100%;
+}
+
+.cell:has(.event-thumbnail-button:nth-of-type(2)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 4px;
+}
+
+.cell:has(.event-thumbnail-button:nth-of-type(2)) > * {
+  flex: 0 0 calc(50% - 2px);
+  min-width: 0;
+}
+
+.cell:has(.event-thumbnail-button:nth-of-type(2)) .event-thumbnail-button img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
