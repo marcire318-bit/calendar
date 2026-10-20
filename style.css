@@ -351,8 +351,8 @@ h1 {
   .cell .event-item { margin: 2px 0; }
 
   .cell .event-thumbnail-button img {
-    height: 28px;
-    max-height: 28px;
+    height: 42px;
+    max-height: 42px;
   }
 
   #detail-panel {
