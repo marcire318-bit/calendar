@@ -42,10 +42,10 @@ h1 {
   text-shadow: 0 0 18px rgba(113, 224, 241, 0.3);
 }
 
-/* PC：カレンダー左、詳細パネル右 */
+/* PC：カレンダー右、詳細パネル左 */
 #main-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: 320px minmax(0, 1fr);
   align-items: start;
   gap: 20px;
   width: min(100%, 1500px);
