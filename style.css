@@ -379,3 +379,71 @@ h1 {
     font-size: 16px;
   }
 }
+
+/* カレンダー内のサムネイル */
+.event-thumbnail-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--night-blue);
+  cursor: pointer;
+}
+
+.event-thumbnail-button img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.event-thumbnail-button:hover img,
+.event-thumbnail-button:focus-visible img {
+  transform: scale(1.04);
+  filter: brightness(1.12);
+}
+
+.event-thumbnail-button:focus-visible {
+  outline: 2px solid var(--cyan-bright);
+  outline-offset: 2px;
+}
+
+.event-fallback-button {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-light);
+  color: var(--silver);
+  cursor: pointer;
+}
+
+/* 更新ボタン */
+.header .refresh-button {
+  width: auto;
+  height: auto;
+  padding: 9px 13px;
+  border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.header .refresh-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* スマホでは月移動と更新ボタンを詰める */
+@media (max-width: 700px) {
+  .header {
+    flex-wrap: wrap;
+  }
+
+  .header .refresh-button {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+}
