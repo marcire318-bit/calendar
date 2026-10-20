@@ -335,21 +335,19 @@ h1 {
     font-size: 12px;
   }
 
-  .grid { gap: 4px; }
-
-  .cell {
-  min-height: 56px;
-  padding: 3px;
-  border-radius: 7px;
+ .grid {
+  gap: 3px;
 }
 
-  .day {
-    margin-bottom: 5px;
-    font-size: 12px;
-  }
+.day {
+  margin-bottom: 3px;
+  font-size: 11px;
+}
 
-  .cell .event-item { margin: 2px 0; }
-
+.cell .event-item {
+  margin: 1px 0;
+}
+   
  .cell .event-thumbnail-button img {
   width: 100%;
   height: auto;
