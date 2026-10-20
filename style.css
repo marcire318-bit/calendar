@@ -530,3 +530,8 @@ body {
     transition: none !important;
   }
 }
+/* 日曜始まり用の空白セル */
+.cell.empty {
+  visibility: hidden;
+  pointer-events: none;
+}
