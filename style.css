@@ -52,6 +52,16 @@ h1 {
   margin: 0 auto;
 }
 
+#detail-panel {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#calendar {
+  grid-column: 2;
+  grid-row: 1;
+}
+
 /* カレンダー */
 #calendar {
   width: 100%;
