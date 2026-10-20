@@ -492,6 +492,13 @@ function renderCalendar(events) {
   /* 日付グリッド */
   const grid = document.createElement("div");
   grid.className = "grid";
+   
+ // 1日の曜日に合わせて、先頭に空白セルを追加
+  for (let i = 0; i < firstDay; i++) {
+  const blank = document.createElement("div");
+  blank.className = "cell empty";
+  grid.appendChild(blank);
+}
 
   for (let day = 1; day <= last.getDate(); day++) {
     const date = new Date(year, month, day);
