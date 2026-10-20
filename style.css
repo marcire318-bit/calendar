@@ -447,3 +447,47 @@ h1 {
     font-size: 12px;
   }
 }
+
+/* サムネイルを日付セルの中に収める */
+.cell {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.event {
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.event-thumbnail-button {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--night-blue);
+  cursor: pointer;
+}
+
+.event-thumbnail-button img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+@media (max-width: 700px) {
+  .cell {
+    padding: 3px;
+  }
+
+  .event-thumbnail-button {
+    border-radius: 4px;
+  }
+}
