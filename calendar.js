@@ -438,6 +438,7 @@ function renderCalendar(events) {
   const year = current.getFullYear();
   const month = current.getMonth();
   const last = new Date(year, month + 1, 0);
+  const firstDay = new Date(year, month, 1).getDay();
 
   calendar.innerHTML = "";
 
