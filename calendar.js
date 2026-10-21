@@ -1,5 +1,5 @@
 
-const API_KEY = "AIzaSyDia6SpNPAIwhOe98RDFYenub1eylyg_zM";
+const WORKER_URL = "https://stream-calendar-api.marcire318.workers.dev";
 const CHANNEL_ID = "UCqXxS-9x9Ha_UiH6hG4kh5Q";
 const MANUAL_EVENTS_KEY = "streamCalendarManualEvents_v1";
 
@@ -25,11 +25,10 @@ async function fetchYouTube(url) {
 }
 
 function apiUrl(resource, params) {
-  const url = new URL(
-    `https://www.googleapis.com/youtube/v3/${resource}`
-  );
+  const url = new URL(WORKER_URL);
+  url.searchParams.set("resource", resource);
 
-  Object.entries({ ...params, key: API_KEY }).forEach(([key, value]) => {
+  Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(key, value);
   });
 
