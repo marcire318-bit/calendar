@@ -875,18 +875,60 @@ async function init(forceRefresh = false) {
     
 allEvents = await fetchAllEvents(forceRefresh);
 
-// 保存済みの手動登録配信を合流させる
-const manualEvents = loadManualEvents();
 
-const eventMap = new Map(
-  allEvents.map(event => [event.id, event])
-);
+    // 保存済みの手動登録配信を取得
+    const manualEvents = loadManualEvents();
 
-manualEvents.forEach(event => {
-  eventMap.set(event.id, event);
-});
+    // 自動取得した配信をまとめる
+    const eventMap = new Map(
+      allEvents.map(event => [event.id, event])
+    );
 
-allEvents = [...eventMap.values()];
+    // 手動登録した配信も最新情報を取得してから合流する
+    const refreshedManualEvents = await Promise.all(
+      manualEvents.map(async event => {
+        try {
+          const data = await fetchYouTube(
+            apiUrl("videos", {
+              part: "snippet,liveStreamingDetails",
+              id: event.id
+            })
+          );
+
+          const video = data.items?.[0];
+
+          if (!video) {
+            return event;
+          }
+
+          return {
+            ...event,
+            ...video,
+            manualDate: event.manualDate,
+            isManual: true
+          };
+        } catch (error) {
+          console.warn(
+            "手動登録した配信の更新に失敗:",
+            event.id,
+            error
+          );
+
+          // 更新できなかった配信は既存データを維持
+          return event;
+        }
+      })
+    );
+
+    // 更新した手動登録データを保存
+    saveManualEvents(refreshedManualEvents);
+
+    // 手動登録した配信をカレンダーに合流
+    refreshedManualEvents.forEach(event => {
+      eventMap.set(event.id, event);
+    });
+
+    allEvents = [...eventMap.values()];
 
 renderCalendar(allEvents);
 
