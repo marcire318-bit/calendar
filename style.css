@@ -535,3 +535,29 @@ body {
   visibility: hidden;
   pointer-events: none;
 }
+
+
+/* ヘッダーのLIVEボタン */
+.header .live-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  min-width: max-content;
+  white-space: nowrap;
+  padding: 8px 12px;
+  margin: 0;
+  border: 1px solid #ff6b78;
+  border-radius: 999px;
+  background: rgba(180, 35, 55, 0.2);
+  color: #ffdce0;
+  font-size: 13px;
+  line-height: 1.2;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.header .live-button:hover {
+  background: rgba(220, 45, 65, 0.35);
+}
