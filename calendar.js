@@ -356,7 +356,7 @@ async function addManualEvent() {
     renderCalendar(allEvents);
     showEventDetails(manualEvent);
 
-    alert("コラボ配信を登録したよ！");
+    alert("配信を登録したよ！");
   } catch (error) {
     console.error(error);
     alert(
@@ -535,7 +535,6 @@ function appendDetailRow(container, label, value) {
   row.append(labelElement, valueElement);
   container.appendChild(row);
 }
-
 
 function showStatus(message, isError = false) {
   const calendar = document.getElementById("calendar");
