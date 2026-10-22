@@ -622,7 +622,27 @@ body {
   outline-offset: 2px;
 }
 
-
 .header .live-button:hover {
   background: rgba(220, 45, 65, 0.35);
+}
+
+/* 詳細画面のボタン配置 */
+#detail-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* タイトルや通常のリンクは横幅いっぱい */
+#detail-info h3,
+#detail-info a {
+  width: 100%;
+}
+
+/* 更新・削除ボタンはサイズを維持して横並び */
+#detail-info .refresh-button,
+#detail-info .delete-button {
+  flex: 0 0 auto;
+  margin: 0;
 }
