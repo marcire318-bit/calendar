@@ -407,6 +407,15 @@ function getEventType(event) {
   return "upcoming";
 }
 
+function isLiveEvent(event) {
+  const live = event.liveStreamingDetails;
+
+  return Boolean(
+    live?.actualStartTime &&
+    !live?.actualEndTime
+  );
+}
+
 function showStatus(message, isError = false) {
   const calendar = document.getElementById("calendar");
   if (!calendar) return;
@@ -485,8 +494,31 @@ function renderCalendar(events) {
     init(true);
   });
 
+  
+const liveEvents = events.filter(isLiveEvent);
+
+if (liveEvents.length > 0) {
+  const liveButton = document.createElement("button");
+  liveButton.type = "button";
+  liveButton.className = "live-button";
+  liveButton.textContent = `🔴 LIVE中 (${liveEvents.length})`;
+  liveButton.addEventListener("click", () => {
+    const live = events.filter(isLiveEvent);
+    if (live.length > 0) {
+      window.open(
+        `https://www.youtube.com/watch?v=${encodeURIComponent(live[0].id)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  });
+
+  header.append(prev, label, next, refresh, addButton, liveButton);
+} else {
   header.append(prev, label, next, refresh, addButton);
-  calendar.appendChild(header);
+}
+
+calendar.appendChild(header);
 
   /* 日付グリッド */
   const grid = document.createElement("div");
@@ -625,8 +657,26 @@ function showEventDetails(event) {
   link.rel = "noopener noreferrer";
   link.textContent = "YouTubeで見る";
 
-  infoContainer.append(heading, link);
+ 
+infoContainer.append(heading, link);
+
+if (isLiveEvent(event)) {
+  const liveButton = document.createElement("button");
+  liveButton.type = "button";
+  liveButton.className = "live-button";
+  liveButton.textContent = "🔴 ライブを視聴する";
+
+  liveButton.addEventListener("click", () => {
+    window.open(
+      `https://www.youtube.com/watch?v=${encodeURIComponent(event.id)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  });
+
+  infoContainer.appendChild(liveButton);
 }
+
 
 /* ------------------------------
    初期化・手動更新
