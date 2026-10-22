@@ -807,6 +807,31 @@ function showEventDetails(event) {
   link.textContent = "YouTubeで見る";
 
   infoContainer.appendChild(link);
+   
+  // 手動登録した配信だけ、更新・削除ボタンを表示
+  if (loadManualEvents().some(item => item.id === event.id)) {
+    const updateButton = document.createElement("button");
+    updateButton.type = "button";
+    updateButton.className = "refresh-button";
+    updateButton.textContent = "↻ 情報を更新";
+
+    updateButton.addEventListener("click", () => {
+      updateManualEvent(event);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "delete-button";
+    deleteButton.textContent = "🗑 削除";
+
+    deleteButton.addEventListener("click", () => {
+      deleteManualEvent(event);
+    });
+
+    infoContainer.append(updateButton, deleteButton);
+  }
+
+
 
   // LIVE中だけ視聴ボタンを表示
   if (isLiveEvent(event)) {
