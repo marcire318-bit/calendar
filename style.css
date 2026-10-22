@@ -413,6 +413,16 @@ body {
       serif;
     letter-spacing: 0.03em;
     line-height: 1.7;
+
+/* タイトル下の余白を調整 */
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
+  /* 配信情報の余白を調整 */
+  #detail-info p {
+    margin-top: 0;
+    margin-bottom: 10px;
   }
 }
 
@@ -667,4 +677,28 @@ body {
 #detail-info .delete-button {
   flex: 0 0 auto;
   margin: 0;
+}
+
+/* PC版：詳細画面のレイアウト調整 */
+@media (min-width: 901px) {
+  #detail-info {
+    display: block;
+    gap: 0;
+  }
+
+  #detail-info h3,
+  #detail-info a {
+    width: auto;
+  }
+
+  #detail-info a {
+    display: inline-block;
+  }
+
+  #detail-info .refresh-button,
+  #detail-info .delete-button {
+    display: inline-flex;
+    width: auto;
+    margin: 8px 6px 0 0;
+  }
 }
