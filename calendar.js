@@ -332,6 +332,7 @@ async function addManualEvent() {
     );
 
     const video = data.items?.[0];
+    console.log("手動登録動画の配信情報:", video); 
 
     if (!video) {
       alert("配信情報を取得できなかったよ。URLや公開設定を確認してね。");
