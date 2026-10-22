@@ -829,6 +829,7 @@ function showEventDetails(event) {
 
     infoContainer.append(updateButton, deleteButton);
   }
+}
 
 /* ------------------------------
    初期化・手動更新
