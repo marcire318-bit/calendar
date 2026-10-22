@@ -536,7 +536,6 @@ body {
   pointer-events: none;
 }
 
-
 /* ヘッダーのLIVEボタン */
 .header .live-button {
   display: inline-flex;
@@ -557,6 +556,72 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
+
+
+/* 詳細画面の手動登録ボタン */
+#detail-info .refresh-button,
+#detail-info .delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  min-height: 34px;
+  padding: 7px 12px;
+  margin: 8px 6px 0 0;
+
+  border: 1px solid;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* 情報を更新：透明感のあるブルー */
+#detail-info .refresh-button {
+  color: #c8f2ff;
+  background: rgba(44, 145, 185, 0.2);
+  border-color: rgba(112, 211, 239, 0.55);
+}
+
+#detail-info .refresh-button:hover {
+  background: rgba(44, 145, 185, 0.38);
+  border-color: #82def5;
+}
+
+/* 削除：落ち着いた赤系 */
+#detail-info .delete-button {
+  color: #ffd9df;
+  background: rgba(150, 48, 69, 0.18);
+  border-color: rgba(231, 112, 135, 0.45);
+}
+
+#detail-info .delete-button:hover {
+  background: rgba(180, 48, 69, 0.35);
+  border-color: #e77b91;
+}
+
+/* クリック時 */
+#detail-info .refresh-button:active,
+#detail-info .delete-button:active {
+  transform: scale(0.97);
+}
+
+/* キーボード操作時 */
+#detail-info .refresh-button:focus-visible,
+#detail-info .delete-button:focus-visible {
+  outline: 2px solid #a8e8ff;
+  outline-offset: 2px;
+}
+
 
 .header .live-button:hover {
   background: rgba(220, 45, 65, 0.35);
