@@ -479,6 +479,22 @@ body {
     font-size: 12px;
   }
 
+  /* スマホでもLIVEボタンを横長で表示 */
+  .header .live-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: max-content;
+    height: 36px;
+    padding: 7px 10px;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+
   #calendar .header button.add-button {
     min-width: 64px;
     height: 36px;
@@ -530,6 +546,7 @@ body {
     transition: none !important;
   }
 }
+
 /* 日曜始まり用の空白セル */
 .cell.empty {
   visibility: hidden;
@@ -634,13 +651,18 @@ body {
   gap: 8px;
 }
 
-/* タイトルや通常のリンクは横幅いっぱい */
-#detail-info h3,
-#detail-info a {
+/* タイトルは1段分 */
+#detail-info h3 {
   width: 100%;
 }
 
-/* 更新・削除ボタンはサイズを維持して横並び */
+/* YouTubeで見るボタンは元のサイズを維持 */
+#detail-info a {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+/* 更新・削除ボタンはYouTubeボタンの下に横並び */
 #detail-info .refresh-button,
 #detail-info .delete-button {
   flex: 0 0 auto;
