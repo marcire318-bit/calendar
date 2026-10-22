@@ -675,7 +675,9 @@ if (isLiveEvent(event)) {
   });
 
   infoContainer.appendChild(liveButton);
+  }
 }
+
 
 
 /* ------------------------------
