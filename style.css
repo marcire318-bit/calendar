@@ -701,4 +701,18 @@ body {
     width: auto;
     margin: 8px 6px 0 0;
   }
+   
+  /* 更新・削除ボタンをYouTubeボタンの下に横並び */
+  #detail-info .refresh-button,
+  #detail-info .delete-button {
+    display: inline-flex;
+    vertical-align: middle;
+    width: auto;
+    margin: 8px 6px 0 0;
+  }
+
+  #detail-info .refresh-button {
+    margin-left: 0;
+  }
+
 }
