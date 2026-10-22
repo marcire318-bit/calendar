@@ -563,7 +563,10 @@ body {
   pointer-events: none;
 }
 
-/* ヘッダーのLIVEボタン */
+/* ========================================
+   LIVEボタン
+   ======================================== */
+
 .header .live-button {
   display: inline-flex;
   align-items: center;
@@ -571,7 +574,6 @@ body {
   gap: 4px;
   width: auto;
   min-width: max-content;
-  white-space: nowrap;
   padding: 8px 12px;
   margin: 0;
   border: 1px solid #ff6b78;
@@ -580,31 +582,35 @@ body {
   color: #ffdce0;
   font-size: 13px;
   line-height: 1.2;
+  white-space: nowrap;
   cursor: pointer;
   flex-shrink: 0;
 }
 
+.header .live-button:hover {
+  background: rgba(220, 45, 65, 0.35);
+}
 
-/* 詳細画面の手動登録ボタン */
+/* ========================================
+   詳細画面の更新・削除ボタン
+   ======================================== */
+
 #detail-info .refresh-button,
 #detail-info .delete-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-
+  width: auto;
   min-height: 34px;
   padding: 7px 12px;
   margin: 8px 6px 0 0;
-
   border: 1px solid;
   border-radius: 8px;
-
   font-family: inherit;
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
-
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -612,7 +618,7 @@ body {
     transform 0.2s ease;
 }
 
-/* 情報を更新：透明感のあるブルー */
+/* 情報を更新：ブルー */
 #detail-info .refresh-button {
   color: #c8f2ff;
   background: rgba(44, 145, 185, 0.2);
@@ -624,7 +630,7 @@ body {
   border-color: #82def5;
 }
 
-/* 削除：落ち着いた赤系 */
+/* 削除：レッド */
 #detail-info .delete-button {
   color: #ffd9df;
   background: rgba(150, 48, 69, 0.18);
@@ -636,83 +642,40 @@ body {
   border-color: #e77b91;
 }
 
-/* クリック時 */
+/* クリック・キーボード操作 */
 #detail-info .refresh-button:active,
 #detail-info .delete-button:active {
   transform: scale(0.97);
 }
 
-/* キーボード操作時 */
 #detail-info .refresh-button:focus-visible,
 #detail-info .delete-button:focus-visible {
   outline: 2px solid #a8e8ff;
   outline-offset: 2px;
 }
 
-.header .live-button:hover {
-  background: rgba(220, 45, 65, 0.35);
-}
+/* ========================================
+   PC版：詳細画面のボタン配置
+   ======================================== */
 
-/* 詳細画面のボタン配置 */
-#detail-info {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-/* タイトルは1段分 */
-#detail-info h3 {
-  width: 100%;
-}
-
-/* YouTubeで見るボタンは元のサイズを維持 */
-#detail-info a {
-  width: auto;
-  flex: 0 0 auto;
-}
-
-/* 更新・削除ボタンはYouTubeボタンの下に横並び */
-#detail-info .refresh-button,
-#detail-info .delete-button {
-  flex: 0 0 auto;
-  margin: 0;
-}
-
-/* PC版：詳細画面のレイアウト調整 */
 @media (min-width: 901px) {
   #detail-info {
     display: block;
     gap: 0;
   }
 
-  #detail-info h3,
+  /* YouTubeボタンは元のサイズを維持し、単独の段に置く */
   #detail-info a {
-    width: auto;
+    display: block;
+    width: fit-content;
   }
 
-  #detail-info a {
-    display: inline-block;
-  }
-
+  /* 更新・削除ボタンはその下に横並び */
   #detail-info .refresh-button,
   #detail-info .delete-button {
     display: inline-flex;
     width: auto;
     margin: 8px 6px 0 0;
-  }
-   
-  /* 更新・削除ボタンをYouTubeボタンの下に横並び */
-  #detail-info .refresh-button,
-  #detail-info .delete-button {
-    display: inline-flex;
     vertical-align: middle;
-    width: auto;
-    margin: 8px 6px 0 0;
   }
-
-  #detail-info .refresh-button {
-    margin-left: 0;
-  }
-
 }
