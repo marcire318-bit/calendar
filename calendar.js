@@ -416,6 +416,126 @@ function isLiveEvent(event) {
   );
 }
 
+/* ------------------------------
+   詳細画面の表示用関数
+------------------------------ */
+
+// 詳細画面に表示する開始日時
+function getDisplayStart(event) {
+  const live = event.liveStreamingDetails || {};
+  const type = getEventType(event);
+
+  if (type === "upcoming") {
+    return (
+      live.scheduledStartTime ||
+      event.manualDate ||
+      event.snippet?.publishedAt ||
+      null
+    );
+  }
+
+  return (
+    live.actualStartTime ||
+    event.archiveStart ||
+    event.snippet?.publishedAt ||
+    event.manualDate ||
+    null
+  );
+}
+
+// 日時を日本語表記にする
+function formatDateTime(value) {
+  if (!value) return "未取得";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "未取得";
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Tokyo"
+  }).format(date);
+}
+
+// ミリ秒を「○時間○分」に変換する
+function formatDuration(milliseconds) {
+  if (!Number.isFinite(milliseconds) || milliseconds < 0) {
+    return "未取得";
+  }
+
+  const totalMinutes = Math.floor(milliseconds / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0) {
+    return `${hours}時間${minutes}分`;
+  }
+
+  return `${minutes}分`;
+}
+
+// 配信時間を取得する
+function getDisplayDuration(event) {
+  const live = event.liveStreamingDetails || {};
+  const type = getEventType(event);
+
+  if (type === "upcoming") return "未開始";
+
+  if (!live.actualStartTime) return "未取得";
+
+  const start = new Date(live.actualStartTime).getTime();
+  const end = live.actualEndTime
+    ? new Date(live.actualEndTime).getTime()
+    : Date.now();
+
+  if (
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    end < start
+  ) {
+    return "未取得";
+  }
+
+  const duration = formatDuration(end - start);
+
+  return type === "live"
+    ? `${duration}（経過時間）`
+    : duration;
+}
+
+// 配信状態を日本語で表示する
+function getDisplayStatus(event) {
+  const type = getEventType(event);
+
+  if (type === "live") return "🔴 LIVE配信中";
+  if (type === "archive") return "📼 アーカイブ";
+
+  return "🗓️ 配信予定";
+}
+
+// 詳細項目を1行ずつ追加する
+function appendDetailRow(container, label, value) {
+  const row = document.createElement("p");
+  row.className = "detail-row";
+
+  const labelElement = document.createElement("strong");
+  labelElement.className = "detail-label";
+  labelElement.textContent = `${label}：`;
+
+  const valueElement = document.createElement("span");
+  valueElement.className = "detail-value";
+  valueElement.textContent = value;
+
+  row.append(labelElement, valueElement);
+  container.appendChild(row);
+}
+
+
 function showStatus(message, isError = false) {
   const calendar = document.getElementById("calendar");
   if (!calendar) return;
@@ -624,6 +744,7 @@ calendar.appendChild(header);
 /* ------------------------------
    詳細パネル
 ------------------------------ */
+
 function showEventDetails(event) {
   const thumbnailContainer =
     document.getElementById("detail-thumbnail");
@@ -637,6 +758,7 @@ function showEventDetails(event) {
   thumbnailContainer.innerHTML = "";
   infoContainer.innerHTML = "";
 
+  // 1. サムネイル画像
   const thumb = getThumbnail(event);
 
   if (thumb) {
@@ -647,9 +769,35 @@ function showEventDetails(event) {
     thumbnailContainer.appendChild(image);
   }
 
+  // 2. 配信タイトル
   const heading = document.createElement("h3");
   heading.textContent = event.snippet?.title || "タイトル不明";
+  infoContainer.appendChild(heading);
 
+  // 3. 開始日時
+  const startDate = getDisplayStart(event);
+
+  appendDetailRow(
+    infoContainer,
+    "開始日時",
+    startDate ? formatDateTime(startDate) : "未取得"
+  );
+
+  // 4. 配信時間
+  appendDetailRow(
+    infoContainer,
+    "配信時間",
+    getDisplayDuration(event)
+  );
+
+  // 5. 配信状態
+  appendDetailRow(
+    infoContainer,
+    "配信状態",
+    getDisplayStatus(event)
+  );
+
+  // YouTubeへのリンク
   const link = document.createElement("a");
   link.href =
     `https://www.youtube.com/watch?v=${encodeURIComponent(event.id)}`;
@@ -657,27 +805,26 @@ function showEventDetails(event) {
   link.rel = "noopener noreferrer";
   link.textContent = "YouTubeで見る";
 
- 
-infoContainer.append(heading, link);
+  infoContainer.appendChild(link);
 
-if (isLiveEvent(event)) {
-  const liveButton = document.createElement("button");
-  liveButton.type = "button";
-  liveButton.className = "live-button";
-  liveButton.textContent = "🔴 ライブを視聴する";
+  // LIVE中だけ視聴ボタンを表示
+  if (isLiveEvent(event)) {
+    const liveButton = document.createElement("button");
+    liveButton.type = "button";
+    liveButton.className = "live-button";
+    liveButton.textContent = "🔴 ライブを視聴する";
 
-  liveButton.addEventListener("click", () => {
-    window.open(
-      `https://www.youtube.com/watch?v=${encodeURIComponent(event.id)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  });
+    liveButton.addEventListener("click", () => {
+      window.open(
+        `https://www.youtube.com/watch?v=${encodeURIComponent(event.id)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
 
-  infoContainer.appendChild(liveButton);
+    infoContainer.appendChild(liveButton);
   }
 }
-
 
 
 /* ------------------------------
