@@ -831,28 +831,6 @@ function showEventDetails(event) {
     infoContainer.append(updateButton, deleteButton);
   }
 
-
-
-  // LIVE中だけ視聴ボタンを表示
-  if (isLiveEvent(event)) {
-    const liveButton = document.createElement("button");
-    liveButton.type = "button";
-    liveButton.className = "live-button";
-    liveButton.textContent = "🔴 ライブを視聴する";
-
-    liveButton.addEventListener("click", () => {
-      window.open(
-        `https://www.youtube.com/watch?v=${encodeURIComponent(event.id)}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    });
-
-    infoContainer.appendChild(liveButton);
-  }
-}
-
-
 /* ------------------------------
    初期化・手動更新
 ------------------------------ */
