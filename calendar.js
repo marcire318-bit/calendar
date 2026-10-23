@@ -281,27 +281,6 @@ async function updateManualEvent(event) {
       isManual: true
     };
 
-    // 保存データを更新
-    const manualEvents = loadManualEvents().map(item =>
-      item.id === event.id ? updatedEvent : item
-    );
-    saveManualEvents(manualEvents);
-
-    // カレンダー表示を更新
-    allEvents = allEvents.map(item =>
-      item.id === event.id ? updatedEvent : item
-    );
-
-    renderCalendar(allEvents);
-    showEventDetails(updatedEvent);
-
-    alert("配信情報を更新したよ！");
-  } catch (error) {
-    console.error("手動登録した配信の更新に失敗:", error);
-    alert("更新できなかったよ。時間をおいてもう一度試してね。");
-  }
-}
-
   if (!confirmed) return;
 
   // 手動登録一覧から削除
@@ -328,7 +307,26 @@ async function updateManualEvent(event) {
 
   renderCalendar(allEvents);
 }
+    // 保存データを更新
+    const manualEvents = loadManualEvents().map(item =>
+      item.id === event.id ? updatedEvent : item
+    );
+    saveManualEvents(manualEvents);
 
+    // カレンダー表示を更新
+    allEvents = allEvents.map(item =>
+      item.id === event.id ? updatedEvent : item
+    );
+
+    renderCalendar(allEvents);
+    showEventDetails(updatedEvent);
+
+    alert("配信情報を更新したよ！");
+  } catch (error) {
+    console.error("手動登録した配信の更新に失敗:", error);
+    alert("更新できなかったよ。時間をおいてもう一度試してね。");
+  }
+}
 function getVideoId(input) {
   try {
     const url = new URL(input.trim());
