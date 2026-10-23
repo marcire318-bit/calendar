@@ -697,13 +697,8 @@ calendar.appendChild(header);
 
         button.appendChild(image);
 
-        // PC：マウスを乗せると詳細を表示
-        button.addEventListener("mouseenter", () => {
-          showEventDetails(event);
-        });
-
-        // キーボード操作にも対応
-        button.addEventListener("focus", () => {
+      　// クリックしたときだけ詳細を表示
+        button.addEventListener("click", () => {
           showEventDetails(event);
         });
 
