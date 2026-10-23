@@ -251,6 +251,37 @@ function saveManualEvents(events) {
     JSON.stringify(events)
   );
 }
+function deleteManualEvent(event) {
+  const confirmed = confirm(
+    `「${event.snippet?.title || "この配信"}」を手動登録一覧から削除する？`
+  );
+
+  if (!confirmed) return;
+
+  // 手動登録一覧から削除
+  const manualEvents = loadManualEvents().filter(
+    item => item.id !== event.id
+  );
+  saveManualEvents(manualEvents);
+
+  // カレンダーの表示からも削除
+  allEvents = allEvents.filter(
+    item => item.id !== event.id
+  );
+
+  // 詳細パネルを閉じる
+  selectedEventId = null;
+
+  const thumbnailContainer =
+    document.getElementById("detail-thumbnail");
+  const infoContainer =
+    document.getElementById("detail-info");
+
+  if (thumbnailContainer) thumbnailContainer.innerHTML = "";
+  if (infoContainer) infoContainer.innerHTML = "";
+
+  renderCalendar(allEvents);
+}
 
 function getVideoId(input) {
   try {
