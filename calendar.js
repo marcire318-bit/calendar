@@ -256,6 +256,52 @@ function deleteManualEvent(event) {
     `「${event.snippet?.title || "この配信"}」を手動登録一覧から削除する？`
   );
 
+async function updateManualEvent(event) {
+  try {
+    // YouTubeから最新情報を取得
+    const data = await fetchYouTube(
+      apiUrl("videos", {
+        part: "snippet,liveStreamingDetails",
+        id: event.id
+      })
+    );
+
+    const video = data.items?.[0];
+
+    if (!video) {
+      alert("配信情報を取得できなかったよ。");
+      return;
+    }
+
+    // 手動登録の日付を維持して最新情報に置き換える
+    const updatedEvent = {
+      ...event,
+      ...video,
+      manualDate: event.manualDate,
+      isManual: true
+    };
+
+    // 保存データを更新
+    const manualEvents = loadManualEvents().map(item =>
+      item.id === event.id ? updatedEvent : item
+    );
+    saveManualEvents(manualEvents);
+
+    // カレンダー表示を更新
+    allEvents = allEvents.map(item =>
+      item.id === event.id ? updatedEvent : item
+    );
+
+    renderCalendar(allEvents);
+    showEventDetails(updatedEvent);
+
+    alert("配信情報を更新したよ！");
+  } catch (error) {
+    console.error("手動登録した配信の更新に失敗:", error);
+    alert("更新できなかったよ。時間をおいてもう一度試してね。");
+  }
+}
+
   if (!confirmed) return;
 
   // 手動登録一覧から削除
