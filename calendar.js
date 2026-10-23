@@ -251,14 +251,40 @@ function saveManualEvents(events) {
     JSON.stringify(events)
   );
 }
+
+// 手動登録した配信を削除
 function deleteManualEvent(event) {
   const confirmed = confirm(
     `「${event.snippet?.title || "この配信"}」を手動登録一覧から削除する？`
   );
 
+  if (!confirmed) return;
+
+  const manualEvents = loadManualEvents().filter(
+    item => item.id !== event.id
+  );
+  saveManualEvents(manualEvents);
+
+  allEvents = allEvents.filter(
+    item => item.id !== event.id
+  );
+
+  selectedEventId = null;
+
+  const thumbnailContainer =
+    document.getElementById("detail-thumbnail");
+  const infoContainer =
+    document.getElementById("detail-info");
+
+  if (thumbnailContainer) thumbnailContainer.innerHTML = "";
+  if (infoContainer) infoContainer.innerHTML = "";
+
+  renderCalendar(allEvents);
+}
+
+// 手動登録した配信の情報を更新
 async function updateManualEvent(event) {
   try {
-    // YouTubeから最新情報を取得
     const data = await fetchYouTube(
       apiUrl("videos", {
         part: "snippet,liveStreamingDetails",
@@ -273,7 +299,6 @@ async function updateManualEvent(event) {
       return;
     }
 
-    // 手動登録の日付を維持して最新情報に置き換える
     const updatedEvent = {
       ...event,
       ...video,
@@ -281,39 +306,11 @@ async function updateManualEvent(event) {
       isManual: true
     };
 
-  if (!confirmed) return;
-
-  // 手動登録一覧から削除
-  const manualEvents = loadManualEvents().filter(
-    item => item.id !== event.id
-  );
-  saveManualEvents(manualEvents);
-
-  // カレンダーの表示からも削除
-  allEvents = allEvents.filter(
-    item => item.id !== event.id
-  );
-
-  // 詳細パネルを閉じる
-  selectedEventId = null;
-
-  const thumbnailContainer =
-    document.getElementById("detail-thumbnail");
-  const infoContainer =
-    document.getElementById("detail-info");
-
-  if (thumbnailContainer) thumbnailContainer.innerHTML = "";
-  if (infoContainer) infoContainer.innerHTML = "";
-
-  renderCalendar(allEvents);
-}
-    // 保存データを更新
     const manualEvents = loadManualEvents().map(item =>
       item.id === event.id ? updatedEvent : item
     );
     saveManualEvents(manualEvents);
 
-    // カレンダー表示を更新
     allEvents = allEvents.map(item =>
       item.id === event.id ? updatedEvent : item
     );
@@ -327,6 +324,7 @@ async function updateManualEvent(event) {
     alert("更新できなかったよ。時間をおいてもう一度試してね。");
   }
 }
+
 function getVideoId(input) {
   try {
     const url = new URL(input.trim());
