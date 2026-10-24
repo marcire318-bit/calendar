@@ -502,7 +502,7 @@
 <style>
   @page {
     size: 178mm 127mm;
-    margin: 4mm;
+    margin: 3mm;
   }
 
   * {
@@ -519,11 +519,11 @@
   }
 
   .print-page {
-    width: 170mm;
-    height: 119mm;
+    width: 172mm;
+    height: 121mm;
     display: grid;
     grid-template-columns: repeat(4, 40mm);
-    grid-template-rows: repeat(5, 22mm);
+    grid-template-rows: repeat(5, 22.5mm);
     column-gap: 2mm;
     row-gap: 2mm;
     align-content: start;
@@ -540,7 +540,7 @@
 
   .thumb-cell {
     width: 40mm;
-    height: 22mm;
+    height: 22.5mm;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -551,7 +551,7 @@
   .thumb-cell img {
     display: block;
     width: 40mm;
-    height: 22mm;
+    height: 22.5mm;
     object-fit: contain;
   }
 
