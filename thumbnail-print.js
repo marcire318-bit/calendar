@@ -592,7 +592,6 @@ ${pageHtml}
   async function processThumbnailForPrint(url) {
     return new Promise(resolve => {
       const image = new Image();
-      image.crossOrigin = "anonymous";
 
       image.onload = () => {
         try {
@@ -602,6 +601,31 @@ ${pageHtml}
           if (!width || !height) {
             resolve(url);
             return;
+          }
+
+          const targetRatio = 16 / 9;
+          const sourceRatio = width / height;
+
+          // すでに16:9なら、元画像をそのまま使う
+          if (Math.abs(sourceRatio - targetRatio) < 0.01) {
+            resolve(url);
+            return;
+          }
+
+          let sourceX = 0;
+          let sourceY = 0;
+          let sourceWidth = width;
+          let sourceHeight = height;
+
+          // 4:3など横長の画像は、上下を切って16:9にする
+          // 黒帯も元画像の一部として扱い、検出・除去しない
+          if (sourceRatio < targetRatio) {
+            sourceHeight = width / targetRatio;
+            sourceY = (height - sourceHeight) / 2;
+          } else {
+            // 16:9より横長の場合は、左右を切って16:9にする
+            sourceWidth = height * targetRatio;
+            sourceX = (width - sourceWidth) / 2;
           }
 
           const canvas = document.createElement("canvas");
@@ -615,125 +639,22 @@ ${pageHtml}
             return;
           }
 
-          const targetRatio = 16 / 9;
-          let sourceX = 0;
-          let sourceY = 0;
-          let sourceWidth = width;
-          let sourceHeight = height;
-
-          // 画像の上下端に、横幅全体に広がる黒帯があるか調べる
-          const scanCanvas = document.createElement("canvas");
-          scanCanvas.width = width;
-          scanCanvas.height = height;
-
-          const scanCtx = scanCanvas.getContext("2d", {
-            willReadFrequently: true
-          });
-
-          if (!scanCtx) {
-            resolve(url);
-            return;
-          }
-
-          scanCtx.drawImage(image, 0, 0, width, height);
-
-          const pixels = scanCtx.getImageData(
-            0, 0, width, height
-          ).data;
-
-          function isBlackRow(y) {
-            const samples = 100;
-            let darkCount = 0;
-
-            for (let i = 0; i < samples; i++) {
-              const x = Math.floor(
-                i * (width - 1) / (samples - 1)
-              );
-              const p = (y * width + x) * 4;
-
-              if (
-                pixels[p] < 35 &&
-                pixels[p + 1] < 35 &&
-                pixels[p + 2] < 35
-              ) {
-                darkCount++;
-              }
-            }
-
-            return darkCount / samples >= 0.97;
-          }
-
-          let top = 0;
-          let bottom = height - 1;
-
-          while (
-            top < height * 0.3 &&
-            isBlackRow(top)
-          ) {
-            top++;
-          }
-
-          while (
-            bottom > height * 0.7 &&
-            isBlackRow(bottom)
-          ) {
-            bottom--;
-          }
-
-          const croppedHeight = bottom - top + 1;
-          const croppedRatio = width / croppedHeight;
-
-          const topBand = top / height;
-          const bottomBand = (height - 1 - bottom) / height;
-
-          // 上下に黒帯があり、除去後がほぼ16:9になる場合だけ除去
-          const hasTopBand = topBand >= 0.02;
-          const hasBottomBand = bottomBand >= 0.02;
-          const looksLikeLetterbox =
-            hasTopBand &&
-            hasBottomBand &&
-            croppedRatio >= 1.65 &&
-            croppedRatio <= 1.9;
-
-          if (looksLikeLetterbox) {
-            sourceY = top;
-            sourceHeight = croppedHeight;
-          }
-
-          // 絵を切らず、16:9の出力枠内に全体を収める
-          const sourceRatio = sourceWidth / sourceHeight;
-          let drawWidth = canvas.width;
-          let drawHeight = canvas.height;
-
-          if (sourceRatio > targetRatio) {
-            drawHeight = drawWidth / sourceRatio;
-          } else {
-            drawWidth = drawHeight * sourceRatio;
-          }
-
-          const destX = (canvas.width - drawWidth) / 2;
-          const destY = (canvas.height - drawHeight) / 2;
-
-          ctx.fillStyle = "#000";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
           ctx.drawImage(
             image,
             sourceX,
             sourceY,
             sourceWidth,
             sourceHeight,
-            destX,
-            destY,
-            drawWidth,
-            drawHeight
+            0,
+            0,
+            1600,
+            900
           );
 
           resolve(canvas.toDataURL("image/jpeg", 0.95));
 
         } catch (error) {
           console.error("サムネイル加工に失敗:", url, error);
-          alert("サムネイルの加工に失敗しました。");
           resolve(url);
         }
       };
