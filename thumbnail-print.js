@@ -600,7 +600,7 @@ if (img.complete && img.naturalWidth > 0) {
     setTimeout(() => {
       window.focus();
       window.print();
-    }, 300);
+    }, 1000);
   });
 <\/script>
 </body>
