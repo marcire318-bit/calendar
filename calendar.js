@@ -39,6 +39,122 @@ async function fetchManualEvents() {
 
   return data.items || [];
 }
+// パスワード入力欄（入力内容を伏せ字で表示）
+function askManualPassword() {
+  return new Promise(resolve => {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.65);
+    `;
+
+    const dialog = document.createElement("form");
+    dialog.style.cssText = `
+      width: 100%;
+      max-width: 340px;
+      box-sizing: border-box;
+      padding: 24px;
+      border-radius: 12px;
+      background: #fff;
+      color: #222;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    `;
+
+    const title = document.createElement("h3");
+    title.textContent = "パスワード入力";
+    title.style.marginTop = "0";
+
+    const description = document.createElement("p");
+    description.textContent = "手動登録用のパスワードを入力してください。";
+
+    const input = document.createElement("input");
+    input.type = "password";
+    input.autocomplete = "current-password";
+    input.placeholder = "パスワード";
+    input.required = true;
+    input.style.cssText = `
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin: 8px 0 18px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      font-size: 16px;
+    `;
+
+    const buttons = document.createElement("div");
+    buttons.style.cssText = `
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    `;
+
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.textContent = "キャンセル";
+
+    const submitButton = document.createElement("button");
+    submitButton.type = "submit";
+    submitButton.textContent = "OK";
+
+    [cancelButton, submitButton].forEach(button => {
+      button.style.cssText = `
+        padding: 10px 16px;
+        border: 1px solid #aaa;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+      `;
+    });
+
+    buttons.append(cancelButton, submitButton);
+    dialog.append(title, description, input, buttons);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    let finished = false;
+
+function escapeHandler(event) {
+  if (event.key === "Escape") {
+    close(null);
+  }
+}
+
+function close(value) {
+  if (finished) return;
+  finished = true;
+  document.removeEventListener("keydown", escapeHandler);
+  overlay.remove();
+  resolve(value);
+}
+
+    dialog.addEventListener("submit", event => {
+      event.preventDefault();
+      if (input.value.length === 0) return;
+      close(input.value);
+    });
+
+    cancelButton.addEventListener("click", () => close(null));
+
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) close(null);
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Escape") close(null);
+    });
+
+    document.addEventListener("keydown", escapeHandler);
+
+    input.focus();
+  });
+}
 
 async function saveManualEventToServer(event, method, password) {
   const response = await fetch(
@@ -302,8 +418,8 @@ async function deleteManualEvent(event) {
 
   if (!confirmed) return;
 
-  const password = prompt("手動登録用のパスワードを入力してね");
-  if (password === null) return;
+ const password = await askManualPassword();
+ if (password === null) return;
 
   try {
     await saveManualEventToServer(event, "DELETE", password);
@@ -354,8 +470,8 @@ async function updateManualEvent(event) {
       isManual: true
     };
 
-    const password = prompt("手動登録用のパスワードを入力してね");
-    if (password === null) return;
+    const password = await askManualPassword();
+     if (password === null) return;
 
     await saveManualEventToServer(updatedEvent, "PUT", password);
 
@@ -469,8 +585,8 @@ async function addManualEvent() {
       isManual: true
     };
 
-    const password = prompt("手動登録用のパスワードを入力してね");
-    if (password === null) return;
+   const password = await askManualPassword();
+     if (password === null) return;
 
     await saveManualEventToServer(manualEvent, "POST", password);
 
