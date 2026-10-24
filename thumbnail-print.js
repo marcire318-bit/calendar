@@ -593,12 +593,16 @@ ${pageHtml}
     return new Promise(resolve => {
       const image = new Image();
 
+      // 外部画像をCanvasで加工できるようにする
+      image.crossOrigin = "anonymous";
+
       image.onload = () => {
         try {
           const width = image.naturalWidth;
           const height = image.naturalHeight;
 
           if (!width || !height) {
+            console.error("画像サイズを取得できません:", url);
             resolve(url);
             return;
           }
@@ -606,26 +610,23 @@ ${pageHtml}
           const targetRatio = 16 / 9;
           const sourceRatio = width / height;
 
-          // すでに16:9なら、元画像をそのまま使う
-          if (Math.abs(sourceRatio - targetRatio) < 0.01) {
-            resolve(url);
-            return;
-          }
-
           let sourceX = 0;
           let sourceY = 0;
           let sourceWidth = width;
           let sourceHeight = height;
 
-          // 4:3など横長の画像は、上下を切って16:9にする
-          // 黒帯も元画像の一部として扱い、検出・除去しない
-          if (sourceRatio < targetRatio) {
+          // 中心位置を固定して16:9に切り抜く
+          // 黒帯の色検出・自動除去は行わない
+          if (sourceRatio > targetRatio) {
+            sourceWidth = height * targetRatio;
+            sourceX = (width - sourceWidth) / 2;
+          } else if (sourceRatio < targetRatio) {
             sourceHeight = width / targetRatio;
             sourceY = (height - sourceHeight) / 2;
           } else {
-            // 16:9より横長の場合は、左右を切って16:9にする
-            sourceWidth = height * targetRatio;
-            sourceX = (width - sourceWidth) / 2;
+            // すでに16:9なら、そのまま使う
+            resolve(url);
+            return;
           }
 
           const canvas = document.createElement("canvas");
@@ -635,8 +636,7 @@ ${pageHtml}
           const ctx = canvas.getContext("2d");
 
           if (!ctx) {
-            resolve(url);
-            return;
+            throw new Error("Canvasを作成できません");
           }
 
           ctx.drawImage(
@@ -651,16 +651,22 @@ ${pageHtml}
             900
           );
 
-          resolve(canvas.toDataURL("image/jpeg", 0.95));
+          // 加工後の画像を書き出す
+          const result = canvas.toDataURL("image/jpeg", 0.95);
+          resolve(result);
 
         } catch (error) {
-          console.error("サムネイル加工に失敗:", url, error);
+          console.error("サムネイル加工に失敗:", error, url);
+          alert(
+            "サムネイルを加工できませんでした。画像の読み込み制限が原因の可能性があります。"
+          );
           resolve(url);
         }
       };
 
       image.onerror = () => {
         console.error("サムネイルを読み込めません:", url);
+        alert("サムネイルを読み込めませんでした。");
         resolve(url);
       };
 
