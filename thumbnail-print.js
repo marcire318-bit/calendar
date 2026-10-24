@@ -589,7 +589,6 @@ ${pageHtml}
     printWindow.document.close();
   }
 
-
   async function processThumbnailForPrint(url) {
     return new Promise(resolve => {
       const image = new Image();
@@ -601,64 +600,72 @@ ${pageHtml}
           const height = image.naturalHeight;
 
           if (!width || !height) {
-            console.error("画像サイズを取得できません:", url);
-            resolve(url);
-            return;
-          }
-
-          const ratio = width / height;
-
-          // 縦長のShortsだけ加工対象から外す
-          if (ratio < 0.8) {
             resolve(url);
             return;
           }
 
           const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
+          canvas.width = 1600;
+          canvas.height = 900;
 
-          const ctx = canvas.getContext("2d", {
-            willReadFrequently: true
-          });
+          const ctx = canvas.getContext("2d");
 
           if (!ctx) {
             resolve(url);
             return;
           }
 
-          ctx.drawImage(image, 0, 0, width, height);
+          const targetRatio = 16 / 9;
+          let sourceX = 0;
+          let sourceY = 0;
+          let sourceWidth = width;
+          let sourceHeight = height;
 
-          const pixels = ctx.getImageData(
+          // 画像の上下端に、横幅全体に広がる黒帯があるか調べる
+          const scanCanvas = document.createElement("canvas");
+          scanCanvas.width = width;
+          scanCanvas.height = height;
+
+          const scanCtx = scanCanvas.getContext("2d", {
+            willReadFrequently: true
+          });
+
+          if (!scanCtx) {
+            resolve(url);
+            return;
+          }
+
+          scanCtx.drawImage(image, 0, 0, width, height);
+
+          const pixels = scanCtx.getImageData(
             0, 0, width, height
           ).data;
 
           function isBlackRow(y) {
-            const sampleCount = 120;
+            const samples = 100;
             let darkCount = 0;
 
-            for (let i = 0; i < sampleCount; i++) {
+            for (let i = 0; i < samples; i++) {
               const x = Math.floor(
-                i * (width - 1) / (sampleCount - 1)
+                i * (width - 1) / (samples - 1)
               );
               const p = (y * width + x) * 4;
 
               if (
-                pixels[p] < 45 &&
-                pixels[p + 1] < 45 &&
-                pixels[p + 2] < 45
+                pixels[p] < 35 &&
+                pixels[p + 1] < 35 &&
+                pixels[p + 2] < 35
               ) {
                 darkCount++;
               }
             }
 
-            return darkCount / sampleCount >= 0.85;
+            return darkCount / samples >= 0.97;
           }
 
           let top = 0;
           let bottom = height - 1;
 
-          // 上下端から黒帯を検出
           while (
             top < height * 0.3 &&
             isBlackRow(top)
@@ -673,66 +680,66 @@ ${pageHtml}
             bottom--;
           }
 
-          let sourceX = 0;
-          let sourceY = top;
-          let sourceWidth = width;
-          let sourceHeight = bottom - top + 1;
+          const croppedHeight = bottom - top + 1;
+          const croppedRatio = width / croppedHeight;
 
-          if (sourceHeight <= 0) {
-            resolve(url);
-            return;
+          const topBand = top / height;
+          const bottomBand = (height - 1 - bottom) / height;
+
+          // 上下に黒帯があり、除去後がほぼ16:9になる場合だけ除去
+          const hasTopBand = topBand >= 0.02;
+          const hasBottomBand = bottomBand >= 0.02;
+          const looksLikeLetterbox =
+            hasTopBand &&
+            hasBottomBand &&
+            croppedRatio >= 1.65 &&
+            croppedRatio <= 1.9;
+
+          if (looksLikeLetterbox) {
+            sourceY = top;
+            sourceHeight = croppedHeight;
           }
 
-          // 黒帯を除いた範囲を中央基準で16:9に切り出す
-          const targetRatio = 16 / 9;
-          const contentRatio = sourceWidth / sourceHeight;
+          // 絵を切らず、16:9の出力枠内に全体を収める
+          const sourceRatio = sourceWidth / sourceHeight;
+          let drawWidth = canvas.width;
+          let drawHeight = canvas.height;
 
-          if (contentRatio > targetRatio) {
-            sourceWidth = sourceHeight * targetRatio;
-            sourceX = (width - sourceWidth) / 2;
-          } else if (contentRatio < targetRatio) {
-            const newHeight = sourceWidth / targetRatio;
-            sourceY = top + (sourceHeight - newHeight) / 2;
-            sourceHeight = newHeight;
+          if (sourceRatio > targetRatio) {
+            drawHeight = drawWidth / sourceRatio;
+          } else {
+            drawWidth = drawHeight * sourceRatio;
           }
 
-          const output = document.createElement("canvas");
-          output.width = 1600;
-          output.height = 900;
+          const destX = (canvas.width - drawWidth) / 2;
+          const destY = (canvas.height - drawHeight) / 2;
 
-          const outputContext = output.getContext("2d");
+          ctx.fillStyle = "#000";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          if (!outputContext) {
-            resolve(url);
-            return;
-          }
-
-          outputContext.drawImage(
+          ctx.drawImage(
             image,
             sourceX,
             sourceY,
             sourceWidth,
             sourceHeight,
-            0,
-            0,
-            1600,
-            900
+            destX,
+            destY,
+            drawWidth,
+            drawHeight
           );
 
-          resolve(output.toDataURL("image/jpeg", 0.95));
+          resolve(canvas.toDataURL("image/jpeg", 0.95));
 
         } catch (error) {
           console.error("サムネイル加工に失敗:", url, error);
-          alert(
-            "サムネイルの加工に失敗しました。Consoleのエラーを確認してください。"
-          );
+          alert("サムネイルの加工に失敗しました。");
           resolve(url);
         }
       };
 
       image.onerror = () => {
         console.error("サムネイルを読み込めません:", url);
-        alert("サムネイルを読み込めませんでした。");
         resolve(url);
       };
 
