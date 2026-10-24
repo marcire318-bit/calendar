@@ -1,8 +1,5 @@
-
-const WORKER_URL = "https://stream-calendar-api.marcire318.workers.dev";
+const WORKER_URL = "https://stream-calendar-api.marcire318-bit.workers.dev";
 const CHANNEL_ID = "UCqXxS-9x9Ha_UiH6hG4kh5Q";
-const MANUAL_EVENTS_KEY = "streamCalendarManualEvents_v1";
-
 const CACHE_KEY = "streamCalendarEvents_v2";
 const CACHE_TTL = 6 * 60 * 60 * 1000; // 6時間
 
@@ -18,6 +15,59 @@ async function fetchYouTube(url) {
       `YouTube APIエラー: ${
         data?.error?.message || `HTTP ${response.status}`
       }`
+    );
+  }
+
+  return data;
+}
+
+/* ------------------------------
+   手動登録データのAPI通信
+------------------------------ */
+async function fetchManualEvents() {
+  const response = await fetch(
+    `${WORKER_URL}?resource=manual-events`
+  );
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error ||
+      `手動登録データの取得に失敗しました（HTTP ${response.status}）`
+    );
+  }
+
+  return data.items || [];
+}
+
+async function saveManualEventToServer(event, method, password) {
+  const response = await fetch(
+    `${WORKER_URL}?resource=manual-events${
+      method === "DELETE"
+        ? `&id=${encodeURIComponent(event.id)}`
+        : ""
+    }`,
+    {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Manual-Password": password
+      },
+      ...(method === "DELETE"
+        ? {}
+        : { body: JSON.stringify(event) })
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("パスワードが違うか、認証に失敗しました。");
+    }
+
+    throw new Error(
+      data?.error || `保存に失敗しました（HTTP ${response.status}）`
     );
   }
 
@@ -79,7 +129,9 @@ async function fetchUpcomingAndLive() {
   const uniqueIds = [...new Set(ids)];
 
   if (!uniqueIds.length) {
-    if (errors.length) throw new Error(errors.join("\n"));
+    if (errors.length) {
+      throw new Error(errors.join("\n"));
+    }
     return [];
   }
 
@@ -183,11 +235,17 @@ async function fetchAllEvents(forceRefresh = false) {
       : [];
 
   if (upcomingResult.status === "rejected") {
-    console.error("配信予定・ライブ中の取得に失敗:", upcomingResult.reason);
+    console.error(
+      "配信予定・ライブ中の取得に失敗:",
+      upcomingResult.reason
+    );
   }
 
   if (archiveResult.status === "rejected") {
-    console.error("アーカイブの取得に失敗:", archiveResult.reason);
+    console.error(
+      "アーカイブの取得に失敗:",
+      archiveResult.reason
+    );
   }
 
   const eventMap = new Map();
@@ -208,11 +266,15 @@ async function fetchAllEvents(forceRefresh = false) {
     const messages = [];
 
     if (upcomingResult.status === "rejected") {
-      messages.push(`配信予定の取得: ${upcomingResult.reason.message}`);
+      messages.push(
+        `配信予定の取得: ${upcomingResult.reason.message}`
+      );
     }
 
     if (archiveResult.status === "rejected") {
-      messages.push(`アーカイブの取得: ${archiveResult.reason.message}`);
+      messages.push(
+        `アーカイブの取得: ${archiveResult.reason.message}`
+      );
     }
 
     throw new Error(
@@ -232,38 +294,24 @@ async function fetchAllEvents(forceRefresh = false) {
   return events;
 }
 
-/* ------------------------------
-   手動登録した配信
------------------------------- */
-function loadManualEvents() {
-  try {
-    return JSON.parse(
-      localStorage.getItem(MANUAL_EVENTS_KEY) || "[]"
-    );
-  } catch {
-    return [];
-  }
-}
-
-function saveManualEvents(events) {
-  localStorage.setItem(
-    MANUAL_EVENTS_KEY,
-    JSON.stringify(events)
-  );
-}
-
 // 手動登録した配信を削除
-function deleteManualEvent(event) {
+async function deleteManualEvent(event) {
   const confirmed = confirm(
     `「${event.snippet?.title || "この配信"}」を手動登録一覧から削除する？`
   );
 
   if (!confirmed) return;
 
-  const manualEvents = loadManualEvents().filter(
-    item => item.id !== event.id
-  );
-  saveManualEvents(manualEvents);
+  const password = prompt("手動登録用のパスワードを入力してね");
+  if (password === null) return;
+
+  try {
+    await saveManualEventToServer(event, "DELETE", password);
+  } catch (error) {
+    console.error("手動登録の削除に失敗:", error);
+    alert(error.message);
+    return;
+  }
 
   allEvents = allEvents.filter(
     item => item.id !== event.id
@@ -306,10 +354,10 @@ async function updateManualEvent(event) {
       isManual: true
     };
 
-    const manualEvents = loadManualEvents().map(item =>
-      item.id === event.id ? updatedEvent : item
-    );
-    saveManualEvents(manualEvents);
+    const password = prompt("手動登録用のパスワードを入力してね");
+    if (password === null) return;
+
+    await saveManualEventToServer(updatedEvent, "PUT", password);
 
     allEvents = allEvents.map(item =>
       item.id === event.id ? updatedEvent : item
@@ -321,7 +369,10 @@ async function updateManualEvent(event) {
     alert("配信情報を更新したよ！");
   } catch (error) {
     console.error("手動登録した配信の更新に失敗:", error);
-    alert("更新できなかったよ。時間をおいてもう一度試してね。");
+    alert(
+      error.message ||
+      "更新できなかったよ。時間をおいてもう一度試してね。"
+    );
   }
 }
 
@@ -362,21 +413,13 @@ async function addManualEvent() {
   const videoId = getVideoId(input);
 
   if (!videoId) {
-    alert("YouTubeの動画URLを確認してね。");
-    return;
-  }
-
-  const existing = loadManualEvents();
-
-  if (existing.some(event => event.id === videoId)) {
-    alert("この配信はすでに登録されているよ。");
+    alert("YouTubeの配信URLを確認してね。");
     return;
   }
 
   const date = prompt(
     "カレンダーに表示する日付を入力してね（例：2026-10-25）"
   );
-
   if (!date) return;
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -397,6 +440,13 @@ async function addManualEvent() {
   }
 
   try {
+    const existing = await fetchManualEvents();
+
+    if (existing.some(event => event.id === videoId)) {
+      alert("この配信はすでに登録されているよ。");
+      return;
+    }
+
     const data = await fetchYouTube(
       apiUrl("videos", {
         part: "snippet,liveStreamingDetails",
@@ -405,10 +455,11 @@ async function addManualEvent() {
     );
 
     const video = data.items?.[0];
-    console.log("手動登録動画の配信情報:", video); 
 
     if (!video) {
-      alert("配信情報を取得できなかったよ。URLや公開設定を確認してね。");
+      alert(
+        "配信情報を取得できなかったよ。URLや公開設定を確認してね。"
+      );
       return;
     }
 
@@ -418,8 +469,10 @@ async function addManualEvent() {
       isManual: true
     };
 
-    existing.push(manualEvent);
-    saveManualEvents(existing);
+    const password = prompt("手動登録用のパスワードを入力してね");
+    if (password === null) return;
+
+    await saveManualEventToServer(manualEvent, "POST", password);
 
     allEvents = [
       ...allEvents.filter(event => event.id !== videoId),
@@ -431,10 +484,10 @@ async function addManualEvent() {
 
     alert("配信を登録したよ！");
   } catch (error) {
-    console.error(error);
+    console.error("手動登録の追加に失敗:", error);
     alert(
-      "配信情報を取得できなかったよ。\n" +
-      "API設定や公開状態を確認してね。"
+      error.message ||
+      "配信を登録できなかったよ。時間をおいてもう一度試してね。"
     );
   }
 }
@@ -463,6 +516,7 @@ function getEventStart(event) {
     null
   );
 }
+
 function getThumbnail(event) {
   return (
     event.snippet?.thumbnails?.high?.url ||
@@ -666,6 +720,7 @@ function renderCalendar(events) {
   refresh.textContent = "↻ 更新";
   refresh.setAttribute("aria-label", "配信情報を手動更新");
   refresh.disabled = isLoading;
+
   const addButton = document.createElement("button");
   addButton.type = "button";
   addButton.className = "add-button";
@@ -687,42 +742,43 @@ function renderCalendar(events) {
     init(true);
   });
 
-  
-const liveEvents = events.filter(isLiveEvent);
+  const liveEvents = events.filter(isLiveEvent);
 
-if (liveEvents.length > 0) {
-  const liveButton = document.createElement("button");
-  liveButton.type = "button";
-  liveButton.className = "live-button";
-  liveButton.textContent = `🔴 LIVE中 (${liveEvents.length})`;
-  liveButton.addEventListener("click", () => {
-    const live = events.filter(isLiveEvent);
-    if (live.length > 0) {
-      window.open(
-        `https://www.youtube.com/watch?v=${encodeURIComponent(live[0].id)}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    }
-  });
+  if (liveEvents.length > 0) {
+    const liveButton = document.createElement("button");
+    liveButton.type = "button";
+    liveButton.className = "live-button";
+    liveButton.textContent = `🔴 LIVE中 (${liveEvents.length})`;
 
-  header.append(prev, label, next, refresh, addButton, liveButton);
-} else {
-  header.append(prev, label, next, refresh, addButton);
-}
+    liveButton.addEventListener("click", () => {
+      const live = events.filter(isLiveEvent);
 
-calendar.appendChild(header);
+      if (live.length > 0) {
+        window.open(
+          `https://www.youtube.com/watch?v=${encodeURIComponent(live[0].id)}`,
+          "_blank",
+          "noopener,noreferrer"
+        );
+      }
+    });
+
+    header.append(prev, label, next, refresh, addButton, liveButton);
+  } else {
+    header.append(prev, label, next, refresh, addButton);
+  }
+
+  calendar.appendChild(header);
 
   /* 日付グリッド */
   const grid = document.createElement("div");
   grid.className = "grid";
-   
- // 1日の曜日に合わせて、先頭に空白セルを追加
+
+  // 1日の曜日に合わせて、先頭に空白セルを追加
   for (let i = 0; i < firstDay; i++) {
-  const blank = document.createElement("div");
-  blank.className = "cell empty";
-  grid.appendChild(blank);
-}
+    const blank = document.createElement("div");
+    blank.className = "cell empty";
+    grid.appendChild(blank);
+  }
 
   for (let day = 1; day <= last.getDate(); day++) {
     const date = new Date(year, month, day);
@@ -741,6 +797,7 @@ calendar.appendChild(header);
     const dayEvents = events
       .filter(event => {
         const start = getEventStart(event);
+
         return start &&
           new Date(start).toDateString() === date.toDateString();
       })
@@ -770,12 +827,7 @@ calendar.appendChild(header);
 
         button.appendChild(image);
 
-      　// クリックしたときだけ詳細を表示
-        button.addEventListener("click", () => {
-          showEventDetails(event);
-        });
-
-        // スマホ：タップで詳細を表示
+        // クリック／タップで詳細を表示
         button.addEventListener("click", () => {
           showEventDetails(event);
         });
@@ -786,9 +838,11 @@ calendar.appendChild(header);
         fallback.type = "button";
         fallback.className = "event-fallback-button";
         fallback.textContent = "サムネイルなし";
+
         fallback.addEventListener("click", () => {
           showEventDetails(event);
         });
+
         eventElement.appendChild(fallback);
       }
 
@@ -797,7 +851,7 @@ calendar.appendChild(header);
     });
 
     grid.appendChild(cell);
-    }
+  }
 
   calendar.appendChild(grid);
 
@@ -812,7 +866,6 @@ calendar.appendChild(header);
 /* ------------------------------
    詳細パネル
 ------------------------------ */
-
 function showEventDetails(event) {
   const thumbnailContainer =
     document.getElementById("detail-thumbnail");
@@ -874,9 +927,9 @@ function showEventDetails(event) {
   link.textContent = "YouTubeで見る";
 
   infoContainer.appendChild(link);
-   
+
   // 手動登録した配信だけ、更新・削除ボタンを表示
-  if (loadManualEvents().some(item => item.id === event.id)) {
+  if (event.isManual) {
     const updateButton = document.createElement("button");
     updateButton.type = "button";
     updateButton.className = "refresh-button";
@@ -906,24 +959,24 @@ async function init(forceRefresh = false) {
   if (isLoading) return;
 
   isLoading = true;
+
   showStatus(
     forceRefresh ? "最新の配信情報を取得中…" : "配信情報を読み込み中…"
   );
 
   // 更新中はボタンを押せないようにする
   const oldRefresh = document.querySelector(".refresh-button");
+
   if (oldRefresh) {
     oldRefresh.disabled = true;
     oldRefresh.textContent = "更新中…";
   }
 
   try {
-    
-allEvents = await fetchAllEvents(forceRefresh);
+    allEvents = await fetchAllEvents(forceRefresh);
 
-
-    // 保存済みの手動登録配信を取得
-    const manualEvents = loadManualEvents();
+    // D1に保存された手動登録配信を取得
+    const manualEvents = await fetchManualEvents();
 
     // 自動取得した配信をまとめる
     const eventMap = new Map(
@@ -966,9 +1019,6 @@ allEvents = await fetchAllEvents(forceRefresh);
       })
     );
 
-    // 更新した手動登録データを保存
-    saveManualEvents(refreshedManualEvents);
-
     // 手動登録した配信をカレンダーに合流
     refreshedManualEvents.forEach(event => {
       eventMap.set(event.id, event);
@@ -976,8 +1026,7 @@ allEvents = await fetchAllEvents(forceRefresh);
 
     allEvents = [...eventMap.values()];
 
-renderCalendar(allEvents);
-
+    renderCalendar(allEvents);
 
     const status = document.getElementById("calendar-status");
     if (status) status.remove();
@@ -994,6 +1043,7 @@ renderCalendar(allEvents);
     isLoading = false;
 
     const refresh = document.querySelector(".refresh-button");
+
     if (refresh) {
       refresh.disabled = false;
       refresh.textContent = "↻ 更新";
