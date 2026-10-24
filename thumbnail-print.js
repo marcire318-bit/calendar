@@ -478,7 +478,9 @@ async function printThumbnails() {
   }
 
   // 元画像はそのまま使い、印刷時の表示方法で黒帯を避ける
-  const processedImages = printList.map(item => item.thumbnail);
+  const processedImages = await Promise.all(
+  printList.map(item => processThumbnailForPrint(item.thumbnail))
+);
 
   const pageSize = 20;
   const pages = [];
@@ -580,12 +582,11 @@ images.forEach(img => {
     img.style.objectFit = ratio < 1.4 ? "contain" : "cover";
   };
 
-  if (img.complete) {
-    applyFit();
-  } else {
-    img.addEventListener("load", applyFit, { once: true });
-  }
-});
+if (img.complete && img.naturalWidth > 0) {
+  applyFit();
+} else {
+  img.addEventListener("load", applyFit, { once: true });
+}
 
     await Promise.all(images.map(img => {
       if (img.complete) return Promise.resolve();
@@ -605,6 +606,103 @@ images.forEach(img => {
 </body>
 </html>`);
   printWindow.document.close();
+}
+
+async function processThumbnailForPrint(url) {
+  return new Promise(resolve => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+
+    image.onload = () => {
+      try {
+        const width = image.naturalWidth;
+        const height = image.naturalHeight;
+        const ratio = width / height;
+
+        // Shortsなどの縦長画像は加工しない
+        if (ratio < 1.4) {
+          resolve(url);
+          return;
+        }
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(image, 0, 0);
+
+        const pixels = ctx.getImageData(0, 0, width, height).data;
+
+        // 画像の横方向を複数箇所調べ、黒い行か判定する
+        function isBlackRow(y) {
+          const sampleCount = 80;
+          let blackCount = 0;
+
+          for (let i = 0; i < sampleCount; i++) {
+            const x = Math.floor(i * (width - 1) / (sampleCount - 1));
+            const p = (y * width + x) * 4;
+
+            if (
+              pixels[p] < 35 &&
+              pixels[p + 1] < 35 &&
+              pixels[p + 2] < 35
+            ) {
+              blackCount++;
+            }
+          }
+
+          return blackCount / sampleCount > 0.9;
+        }
+
+        let top = 0;
+        let bottom = height - 1;
+
+        // 上下それぞれ最大25%まで調べる
+        while (top < height * 0.25 && isBlackRow(top)) {
+          top++;
+        }
+
+        while (bottom > height * 0.75 && isBlackRow(bottom)) {
+          bottom--;
+        }
+
+        const cropHeight = bottom - top + 1;
+
+        // 黒帯がない、または検出結果が不自然なら元画像を使う
+        if (
+          top === 0 &&
+          bottom === height - 1
+        ) {
+          resolve(url);
+          return;
+        }
+
+        if (cropHeight < height * 0.5) {
+          resolve(url);
+          return;
+        }
+
+        // 黒帯を取り除いた画像を生成
+        const output = document.createElement("canvas");
+        output.width = width;
+        output.height = cropHeight;
+
+        output.getContext("2d").drawImage(
+          image,
+          0, top, width, cropHeight,
+          0, 0, width, cropHeight
+        );
+
+        resolve(output.toDataURL("image/jpeg", 0.95));
+      } catch (error) {
+        console.warn("サムネイル加工に失敗:", error);
+        resolve(url);
+      }
+    };
+
+    image.onerror = () => resolve(url);
+    image.src = url;
+  });
 }
 
   function escapeAttribute(value) {
