@@ -589,7 +589,8 @@ ${pageHtml}
     printWindow.document.close();
   }
 
-   async function processThumbnailForPrint(url) {
+
+  async function processThumbnailForPrint(url) {
     return new Promise(resolve => {
       const image = new Image();
       image.crossOrigin = "anonymous";
@@ -607,8 +608,8 @@ ${pageHtml}
 
           const ratio = width / height;
 
-          // 縦長画像は加工しない
-          if (ratio < 1.4) {
+          // 縦長のShortsだけ加工対象から外す
+          if (ratio < 0.8) {
             resolve(url);
             return;
           }
@@ -622,7 +623,6 @@ ${pageHtml}
           });
 
           if (!ctx) {
-            console.error("Canvasを利用できません:", url);
             resolve(url);
             return;
           }
@@ -658,7 +658,7 @@ ${pageHtml}
           let top = 0;
           let bottom = height - 1;
 
-          // 画像の上端と下端から黒帯を検出
+          // 上下端から黒帯を検出
           while (
             top < height * 0.3 &&
             isBlackRow(top)
@@ -679,12 +679,11 @@ ${pageHtml}
           let sourceHeight = bottom - top + 1;
 
           if (sourceHeight <= 0) {
-            console.error("画像領域を検出できません:", url);
             resolve(url);
             return;
           }
 
-          // 黒帯除去後の画像を中央基準で16:9に切り出す
+          // 黒帯を除いた範囲を中央基準で16:9に切り出す
           const targetRatio = 16 / 9;
           const contentRatio = sourceWidth / sourceHeight;
 
@@ -704,7 +703,6 @@ ${pageHtml}
           const outputContext = output.getContext("2d");
 
           if (!outputContext) {
-            console.error("出力画像を作成できません:", url);
             resolve(url);
             return;
           }
@@ -721,17 +719,12 @@ ${pageHtml}
             900
           );
 
-          // 必ず16:9の画像データに変換して返す
           resolve(output.toDataURL("image/jpeg", 0.95));
 
         } catch (error) {
-          console.error(
-            "サムネイルの黒帯除去に失敗しました:",
-            url,
-            error
-          );
+          console.error("サムネイル加工に失敗:", url, error);
           alert(
-            "画像の加工に失敗しました。ブラウザのConsoleにエラーが出ていないか確認が必要です。"
+            "サムネイルの加工に失敗しました。Consoleのエラーを確認してください。"
           );
           resolve(url);
         }
@@ -739,9 +732,7 @@ ${pageHtml}
 
       image.onerror = () => {
         console.error("サムネイルを読み込めません:", url);
-        alert(
-          "サムネイルを読み込めませんでした。画像の読み込み制限が原因の可能性があります。"
-        );
+        alert("サムネイルを読み込めませんでした。");
         resolve(url);
       };
 
