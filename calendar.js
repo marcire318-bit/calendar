@@ -1,4 +1,4 @@
-const WORKER_URL = "https://stream-calendar-api.marcire318-bit.workers.dev";
+const WORKER_URL = "https://stream-calendar-api.marcire318.workers.dev";
 const CHANNEL_ID = "UCqXxS-9x9Ha_UiH6hG4kh5Q";
 const CACHE_KEY = "streamCalendarEvents_v2";
 const CACHE_TTL = 6 * 60 * 60 * 1000; // 6時間
