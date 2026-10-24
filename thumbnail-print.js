@@ -520,14 +520,14 @@ async function printThumbnails() {
   }
 
   .print-page {
-    width: 172mm;
-    height: 121mm;
+    width: 168mm;
+    height: 117mm;
     display: grid;
     grid-template-columns: repeat(4, 40mm);
     grid-template-rows: repeat(5, 22.5mm);
     gap: 2mm;
     align-content: start;
-    justify-content: start;
+    justify-content: center;
     break-after: page;
     page-break-after: always;
     overflow: hidden;
@@ -608,6 +608,7 @@ window.addEventListener("load", async () => {
   printWindow.document.close();
 }
 
+
 async function processThumbnailForPrint(url) {
   return new Promise(resolve => {
     const image = new Image();
@@ -619,56 +620,67 @@ async function processThumbnailForPrint(url) {
         const height = image.naturalHeight;
         const ratio = width / height;
 
-        // Shortsなどの縦長画像は加工しない
+        // Shortsなどの縦長画像は切り取らず、元画像を使う
         if (ratio < 1.4) {
           resolve(url);
           return;
         }
 
         const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
         canvas.width = width;
         canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
         ctx.drawImage(image, 0, 0);
 
-        const pixels = ctx.getImageData(0, 0, width, height).data;
+        const pixels = ctx.getImageData(
+          0, 0, width, height
+        ).data;
 
-        // 画像の横方向を複数箇所調べ、黒い行か判定する
+        // 横方向に広くサンプリングして、黒い行を判定
         function isBlackRow(y) {
-          const sampleCount = 80;
+          const sampleCount = 100;
           let blackCount = 0;
 
           for (let i = 0; i < sampleCount; i++) {
-            const x = Math.floor(i * (width - 1) / (sampleCount - 1));
+            const x = Math.floor(
+              i * (width - 1) / (sampleCount - 1)
+            );
             const p = (y * width + x) * 4;
 
             if (
-              pixels[p] < 35 &&
-              pixels[p + 1] < 35 &&
-              pixels[p + 2] < 35
+              pixels[p] < 45 &&
+              pixels[p + 1] < 45 &&
+              pixels[p + 2] < 45
             ) {
               blackCount++;
             }
           }
 
-          return blackCount / sampleCount > 0.9;
+          return blackCount / sampleCount >= 0.9;
         }
 
         let top = 0;
         let bottom = height - 1;
 
-        // 上下それぞれ最大25%まで調べる
-        while (top < height * 0.25 && isBlackRow(top)) {
+        // 上下それぞれ最大30%の範囲で黒帯を検出
+        while (
+          top < height * 0.3 &&
+          isBlackRow(top)
+        ) {
           top++;
         }
 
-        while (bottom > height * 0.75 && isBlackRow(bottom)) {
+        while (
+          bottom > height * 0.7 &&
+          isBlackRow(bottom)
+        ) {
           bottom--;
         }
 
         const cropHeight = bottom - top + 1;
 
-        // 黒帯がない、または検出結果が不自然なら元画像を使う
+        // 黒帯を検出できなかった場合は元画像を使う
         if (
           top === 0 &&
           bottom === height - 1
@@ -677,20 +689,36 @@ async function processThumbnailForPrint(url) {
           return;
         }
 
+        // 誤検出で画像の大部分が失われる場合は加工しない
         if (cropHeight < height * 0.5) {
           resolve(url);
           return;
         }
 
-        // 黒帯を取り除いた画像を生成
+        // 黒帯を除去した部分を16:9の画像に切り出す
+        const targetHeight = width * 9 / 16;
+        let sourceTop = top;
+        let sourceHeight = cropHeight;
+
+        if (sourceHeight > targetHeight) {
+          sourceTop += (sourceHeight - targetHeight) / 2;
+          sourceHeight = targetHeight;
+        }
+
         const output = document.createElement("canvas");
-        output.width = width;
-        output.height = cropHeight;
+        output.width = 1600;
+        output.height = 900;
 
         output.getContext("2d").drawImage(
           image,
-          0, top, width, cropHeight,
-          0, 0, width, cropHeight
+          0,
+          sourceTop,
+          width,
+          sourceHeight,
+          0,
+          0,
+          output.width,
+          output.height
         );
 
         resolve(output.toDataURL("image/jpeg", 0.95));
