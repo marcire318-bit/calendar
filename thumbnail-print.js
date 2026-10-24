@@ -120,7 +120,7 @@
 
   function updatePrintButtonLabels() {
     document.querySelectorAll("[data-thumbnail-print-open]").forEach(button => {
-      button.textContent = `サムネ印刷（${printList.length}）`;
+      button.textContent = `▧ 印刷 (${printList.length})`;
     });
 
     document.querySelectorAll("[data-thumbnail-print-add]").forEach(button => {
@@ -608,7 +608,7 @@ ${pageHtml}
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "thumbnail-print-button";
+    button.className = "add-button";
     button.dataset.thumbnailPrintOpen = "true";
     button.addEventListener("click", openModal);
     header.appendChild(button);
