@@ -520,8 +520,8 @@ async function printThumbnails() {
   }
 
   .print-page {
-    width: 168mm;
-    height: 117mm;
+    width: 172mm;
+    height: 121mm;
     display: grid;
     grid-template-columns: repeat(4, 40mm);
     grid-template-rows: repeat(5, 22.5mm);
@@ -595,11 +595,6 @@ window.addEventListener("load", async () => {
       img.addEventListener("error", resolve, { once: true });
     });
   }));
-
-  setTimeout(() => {
-    window.focus();
-    window.print();
-  }, 1000);
 });
 
 <\/script>
