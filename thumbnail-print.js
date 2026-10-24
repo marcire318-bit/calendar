@@ -471,7 +471,6 @@ async function printThumbnails() {
   }
 
   const printWindow = window.open("", "_blank");
-
   if (!printWindow) {
     alert("印刷画面が開けませんでした。ブラウザのポップアップを許可してください。");
     return;
@@ -569,39 +568,40 @@ async function printThumbnails() {
 <body>
 ${pageHtml}
 <script>
-  window.addEventListener("load", async () => {
-    const images = Array.from(document.images);
-    
-images.forEach(img => {
-  const applyFit = () => {
-    if (!img.naturalWidth || !img.naturalHeight) return;
 
-    const ratio = img.naturalWidth / img.naturalHeight;
+window.addEventListener("load", async () => {
+  const images = Array.from(document.images);
 
-    // 縦長のShortsは切り取らず、全体を表示する
-    img.style.objectFit = ratio < 1.4 ? "contain" : "cover";
-  };
+  images.forEach(img => {
+    const applyFit = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
 
-if (img.complete && img.naturalWidth > 0) {
-  applyFit();
-} else {
-  img.addEventListener("load", applyFit, { once: true });
-}
+      const ratio = img.naturalWidth / img.naturalHeight;
+      img.style.objectFit = ratio < 1.4 ? "contain" : "cover";
+    };
 
-    await Promise.all(images.map(img => {
-      if (img.complete) return Promise.resolve();
-
-      return new Promise(resolve => {
-        img.onload = resolve;
-        img.onerror = resolve;
-      });
-    }));
-
-    setTimeout(() => {
-      window.focus();
-      window.print();
-    }, 1000);
+    if (img.complete && img.naturalWidth > 0) {
+      applyFit();
+    } else {
+      img.addEventListener("load", applyFit, { once: true });
+    }
   });
+
+  await Promise.all(images.map(img => {
+    if (img.complete) return Promise.resolve();
+
+    return new Promise(resolve => {
+      img.addEventListener("load", resolve, { once: true });
+      img.addEventListener("error", resolve, { once: true });
+    });
+  }));
+
+  setTimeout(() => {
+    window.focus();
+    window.print();
+  }, 1000);
+});
+
 <\/script>
 </body>
 </html>`);
