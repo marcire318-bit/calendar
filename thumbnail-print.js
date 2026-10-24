@@ -477,92 +477,8 @@ async function printThumbnails() {
     return;
   }
 
-  const processedImages = await Promise.all(
-    printList.map(async item => {
-      try {
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-
-        await new Promise((resolve, reject) => {
-          image.onload = resolve;
-          image.onerror = reject;
-          image.src = item.thumbnail;
-        });
-
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
-        canvas.width = image.naturalWidth;
-        canvas.height = image.naturalHeight;
-        ctx.drawImage(image, 0, 0);
-
-        const width = canvas.width;
-        const height = canvas.height;
-        const ratio = width / height;
-
-        // Shortsなど縦長の画像は加工しない
-        if (ratio < 1.4) {
-          return item.thumbnail;
-        }
-
-        const pixels = ctx.getImageData(0, 0, width, height).data;
-
-        function rowIsBlack(y) {
-          let blackCount = 0;
-          const sampleCount = 60;
-
-          for (let i = 0; i < sampleCount; i++) {
-            const x = Math.floor(i * (width - 1) / (sampleCount - 1));
-            const p = (y * width + x) * 4;
-
-            const r = pixels[p];
-            const g = pixels[p + 1];
-            const b = pixels[p + 2];
-
-            if (r < 25 && g < 25 && b < 25) {
-              blackCount++;
-            }
-          }
-
-          return blackCount / sampleCount > 0.92;
-        }
-
-        let top = 0;
-        let bottom = height - 1;
-
-        while (top < height * 0.2 && rowIsBlack(top)) {
-          top++;
-        }
-
-        while (bottom > height * 0.8 && rowIsBlack(bottom)) {
-          bottom--;
-        }
-
-        // 黒帯が検出できなければ元画像を使う
-        if (top < height * 0.01 && bottom > height * 0.99) {
-          return item.thumbnail;
-        }
-
-        const cropHeight = bottom - top + 1;
-
-        // 黒帯を除去した画像を作成
-        const output = document.createElement("canvas");
-        output.width = width;
-        output.height = cropHeight;
-
-        output.getContext("2d").drawImage(
-          canvas,
-          0, top, width, cropHeight,
-          0, 0, width, cropHeight
-        );
-
-        return output.toDataURL("image/jpeg", 0.95);
-      } catch (error) {
-        console.warn("サムネイルの加工に失敗しました:", error);
-        return item.thumbnail;
-      }
-    })
-  );
+  // 元画像はそのまま使い、印刷時の表示方法で黒帯を避ける
+  const processedImages = printList.map(item => item.thumbnail);
 
   const pageSize = 20;
   const pages = [];
@@ -627,12 +543,12 @@ async function printThumbnails() {
     overflow: hidden;
   }
 
-  .thumb-cell img {
-    display: block;
-    width: 40mm;
-    height: 22.5mm;
-    object-fit: fill;
-  }
+ .thumb-cell img {
+  display: block;
+  width: 40mm;
+  height: 22.5mm;
+  object-fit: cover;
+}
 
   @media screen {
     body {
@@ -653,6 +569,23 @@ ${pageHtml}
 <script>
   window.addEventListener("load", async () => {
     const images = Array.from(document.images);
+    
+images.forEach(img => {
+  const applyFit = () => {
+    if (!img.naturalWidth || !img.naturalHeight) return;
+
+    const ratio = img.naturalWidth / img.naturalHeight;
+
+    // 縦長のShortsは切り取らず、全体を表示する
+    img.style.objectFit = ratio < 1.4 ? "contain" : "cover";
+  };
+
+  if (img.complete) {
+    applyFit();
+  } else {
+    img.addEventListener("load", applyFit, { once: true });
+  }
+});
 
     await Promise.all(images.map(img => {
       if (img.complete) return Promise.resolve();
