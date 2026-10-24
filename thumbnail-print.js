@@ -508,7 +508,7 @@ async function printThumbnails() {
 <style>
   @page {
     size: 178mm 127mm;
-    margin: 3mm;
+    margin: 5mm;
   }
 
   * {
