@@ -463,41 +463,129 @@
     updatePrintButtonLabels();
   }
 
-  function printThumbnails() {
-    if (!printList.length) {
-      alert("印刷リストにサムネイルを追加してください。");
-      return;
-    }
+  
+async function printThumbnails() {
+  if (!printList.length) {
+    alert("印刷リストにサムネイルを追加してください。");
+    return;
+  }
 
-    // ユーザーのクリック直後にウィンドウを開き、ポップアップ制限を回避する
-    const printWindow = window.open("", "_blank");
+  const printWindow = window.open("", "_blank");
 
-    if (!printWindow) {
-      alert("印刷画面が開けませんでした。ブラウザのポップアップを許可してください。");
-      return;
-    }
+  if (!printWindow) {
+    alert("印刷画面が開けませんでした。ブラウザのポップアップを許可してください。");
+    return;
+  }
 
-    const pages = [];
-    for (let i = 0; i < printList.length; i += COLUMNS * ROWS) {
-      pages.push(printList.slice(i, i + COLUMNS * ROWS));
-    }
+  const processedImages = await Promise.all(
+    printList.map(async item => {
+      try {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
 
-    const pageHtml = pages.map(pageItems => {
-      const cells = pageItems.map(item => `
-        <div class="thumb-cell">
-          <img src="${escapeAttribute(item.thumbnail)}" alt="">
-        </div>
-      `).join("");
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = reject;
+          image.src = item.thumbnail;
+        });
 
-      return `<section class="print-page">${cells}</section>`;
-    }).join("");
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-    printWindow.document.open();
-    printWindow.document.write(`<!DOCTYPE html>
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        ctx.drawImage(image, 0, 0);
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const ratio = width / height;
+
+        // Shortsなど縦長の画像は加工しない
+        if (ratio < 1.4) {
+          return item.thumbnail;
+        }
+
+        const pixels = ctx.getImageData(0, 0, width, height).data;
+
+        function rowIsBlack(y) {
+          let blackCount = 0;
+          const sampleCount = 60;
+
+          for (let i = 0; i < sampleCount; i++) {
+            const x = Math.floor(i * (width - 1) / (sampleCount - 1));
+            const p = (y * width + x) * 4;
+
+            const r = pixels[p];
+            const g = pixels[p + 1];
+            const b = pixels[p + 2];
+
+            if (r < 25 && g < 25 && b < 25) {
+              blackCount++;
+            }
+          }
+
+          return blackCount / sampleCount > 0.92;
+        }
+
+        let top = 0;
+        let bottom = height - 1;
+
+        while (top < height * 0.2 && rowIsBlack(top)) {
+          top++;
+        }
+
+        while (bottom > height * 0.8 && rowIsBlack(bottom)) {
+          bottom--;
+        }
+
+        // 黒帯が検出できなければ元画像を使う
+        if (top < height * 0.01 && bottom > height * 0.99) {
+          return item.thumbnail;
+        }
+
+        const cropHeight = bottom - top + 1;
+
+        // 黒帯を除去した画像を作成
+        const output = document.createElement("canvas");
+        output.width = width;
+        output.height = cropHeight;
+
+        output.getContext("2d").drawImage(
+          canvas,
+          0, top, width, cropHeight,
+          0, 0, width, cropHeight
+        );
+
+        return output.toDataURL("image/jpeg", 0.95);
+      } catch (error) {
+        console.warn("サムネイルの加工に失敗しました:", error);
+        return item.thumbnail;
+      }
+    })
+  );
+
+  const pageSize = 20;
+  const pages = [];
+
+  for (let i = 0; i < processedImages.length; i += pageSize) {
+    pages.push(processedImages.slice(i, i + pageSize));
+  }
+
+  const pageHtml = pages.map(images => {
+    const cells = images.map(src => `
+      <div class="thumb-cell">
+        <img src="${escapeAttribute(src)}" alt="">
+      </div>
+    `).join("");
+
+    return `<section class="print-page">${cells}</section>`;
+  }).join("");
+
+  printWindow.document.open();
+  printWindow.document.write(`<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>サムネイル印刷</title>
 <style>
   @page {
@@ -514,18 +602,13 @@
     padding: 0;
   }
 
-  body {
-    font-family: sans-serif;
-  }
-
   .print-page {
     width: 172mm;
     height: 121mm;
     display: grid;
     grid-template-columns: repeat(4, 40mm);
     grid-template-rows: repeat(5, 22.5mm);
-    column-gap: 2mm;
-    row-gap: 2mm;
+    gap: 2mm;
     align-content: start;
     justify-content: start;
     break-after: page;
@@ -541,18 +624,14 @@
   .thumb-cell {
     width: 40mm;
     height: 22.5mm;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
-    background: white;
   }
 
   .thumb-cell img {
     display: block;
     width: 40mm;
     height: 22.5mm;
-    object-fit: contain;
+    object-fit: fill;
   }
 
   @media screen {
@@ -563,7 +642,6 @@
 
     .print-page {
       margin: 0 auto 12px;
-      padding: 0;
       background: white;
       box-shadow: 0 1px 6px #999;
     }
@@ -575,8 +653,10 @@ ${pageHtml}
 <script>
   window.addEventListener("load", async () => {
     const images = Array.from(document.images);
+
     await Promise.all(images.map(img => {
       if (img.complete) return Promise.resolve();
+
       return new Promise(resolve => {
         img.onload = resolve;
         img.onerror = resolve;
@@ -591,8 +671,8 @@ ${pageHtml}
 <\/script>
 </body>
 </html>`);
-    printWindow.document.close();
-  }
+  printWindow.document.close();
+}
 
   function escapeAttribute(value) {
     return String(value || "")
