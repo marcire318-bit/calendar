@@ -936,15 +936,25 @@ function renderCalendar(events) {
       .sort((a, b) =>
         new Date(getEventStart(a)) - new Date(getEventStart(b))
       );
-     if (
+    if (
   date.getFullYear() === 2026 &&
   date.getMonth() === 8 &&
   day === 11
 ) {
-  console.log(
-    "9月11日の対象動画:",
-    dayEvents.filter(e => e.id === "lfUberkxaks")
-  );
+  const target = events.find(e => e.id === "lfUberkxaks");
+
+  console.log("9月11日デバッグ:", {
+    targetExists: !!target,
+    manualDate: target?.manualDate,
+    start: target ? getEventStart(target) : null,
+    targetDate: target
+      ? new Date(getEventStart(target)).toDateString()
+      : null,
+    cellDate: date.toDateString(),
+    sameDate: target
+      ? new Date(getEventStart(target)).toDateString() === date.toDateString()
+      : false
+  });
 }
     dayEvents.forEach(event => {
       const eventElement = document.createElement("div");
