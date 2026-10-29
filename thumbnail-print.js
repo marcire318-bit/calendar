@@ -138,21 +138,22 @@
     const style = document.createElement("style");
     style.id = "thumbnail-print-styles";
     style.textContent = `
-  .thumbnail-print-button {
+ .thumbnail-print-button {
+  display: inline-block;
   margin: 6px 4px;
-  padding: 8px 12px;
-  border: 1px solid #72c9e8;
-  border-radius: 8px;
-  background: rgba(22, 91, 132, 0.65);
-  color: #d9f5ff;
+  padding: 10px 16px;
+  border: 1px solid rgba(143, 232, 240, 0.45);
+  border-radius: 9px;
+  background: rgba(80, 160, 180, 0.18);
+  color: #b7f7ff;
+  text-decoration: none;
   cursor: pointer;
   font: inherit;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.2s;
 }
 
 .thumbnail-print-button:hover:not(:disabled) {
-  background: rgba(42, 139, 180, 0.8);
-  border-color: #a1e7ff;
+  background: rgba(80, 190, 205, 0.28);
 }
 
 .thumbnail-print-button:disabled {
