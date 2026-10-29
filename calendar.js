@@ -1177,7 +1177,17 @@ const eventMap = new Map();
 
     allEvents = [...eventMap.values()];
 
-    renderCalendar(allEvents);
+console.log(
+  "描画直前の手動登録動画:",
+  allEvents.filter(e => e.id === "lfUberkxaks").map(e => ({
+    id: e.id,
+    manualDate: e.manualDate,
+    start: getEventStart(e),
+    isManual: e.isManual
+  }))
+);
+
+renderCalendar(allEvents);
 
     const status = document.getElementById("calendar-status");
     if (status) status.remove();
