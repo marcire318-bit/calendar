@@ -936,27 +936,8 @@ function renderCalendar(events) {
       .sort((a, b) =>
         new Date(getEventStart(a)) - new Date(getEventStart(b))
       );
-    if (
-  date.getFullYear() === 2026 &&
-  date.getMonth() === 8 &&
-  day === 11
-) {
-  const target = events.find(e => e.id === "lfUberkxaks");
 
-  console.log("9月11日デバッグ:", {
-    targetExists: !!target,
-    manualDate: target?.manualDate,
-    start: target ? getEventStart(target) : null,
-    targetDate: target
-      ? new Date(getEventStart(target)).toDateString()
-      : null,
-    cellDate: date.toDateString(),
-    sameDate: target
-      ? new Date(getEventStart(target)).toDateString() === date.toDateString()
-      : false
-  });
-}
-    dayEvents.forEach(event => {
+     dayEvents.forEach(event => {
       const eventElement = document.createElement("div");
       eventElement.className = `event ${getEventType(event)}`;
 
@@ -1186,16 +1167,6 @@ const eventMap = new Map();
     });
 
     allEvents = [...eventMap.values()];
-
-console.log(
-  "描画直前の手動登録動画:",
-  allEvents.filter(e => e.id === "lfUberkxaks").map(e => ({
-    id: e.id,
-    manualDate: e.manualDate,
-    start: getEventStart(e),
-    isManual: e.isManual
-  }))
-);
 
 renderCalendar(allEvents);
 
