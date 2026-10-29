@@ -679,3 +679,10 @@ body {
     vertical-align: middle;
   }
 }
+
+/* PC版：詳細画面の印刷リスト追加ボタンを非表示 */
+@media (min-width: 901px) {
+  #detail-info .thumbnail-print-button {
+    display: none;
+  }
+}
