@@ -141,19 +141,13 @@
  .thumbnail-print-button {
   display: inline-block;
   margin: 6px 4px;
-  padding: 10px 16px;
-  border: 1px solid rgba(143, 232, 240, 0.45);
-  border-radius: 9px;
-  background: rgba(80, 160, 180, 0.18);
-  color: #b7f7ff;
-  text-decoration: none;
+  padding: 8px 12px;
+  border: 1px solid #777;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
   cursor: pointer;
   font: inherit;
-  transition: background 0.2s;
-}
-
-.thumbnail-print-button:hover:not(:disabled) {
-  background: rgba(80, 190, 205, 0.28);
 }
 
 .thumbnail-print-button:disabled {
@@ -161,6 +155,19 @@
   cursor: default;
 }
 
+/* 配信詳細画面のボタンだけ青系にする */
+.thumbnail-print-detail-button {
+  padding: 10px 16px;
+  border: 1px solid rgba(143, 232, 240, 0.45);
+  border-radius: 9px;
+  background: rgba(80, 160, 180, 0.18);
+  color: #b7f7ff;
+  transition: background 0.2s;
+}
+
+.thumbnail-print-detail-button:hover:not(:disabled) {
+  background: rgba(80, 190, 205, 0.28);
+}
       #thumbnail-print-overlay {
         position: fixed;
         inset: 0;
@@ -722,8 +729,8 @@ ${pageHtml}
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "thumbnail-print-button";
-    button.dataset.thumbnailPrintAdd = String(event.id);
+    button.className = "thumbnail-print-button thumbnail-print-detail-button";
+button.dataset.thumbnailPrintAdd = String(event.id);
     button.addEventListener("click", () => addEvent(event));
 
     info.appendChild(button);
