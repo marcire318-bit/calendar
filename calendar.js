@@ -39,6 +39,22 @@ async function fetchManualEvents() {
 
   return data.items || [];
 }
+// D1に保存された自動取得配信を取得
+async function fetchAutoEvents() {
+  const response = await fetch(
+    `${WORKER_URL}?resource=auto-events`
+  );
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error ||
+      `保存済み配信の取得に失敗しました（HTTP ${response.status}）`
+    );
+  }
+
+  return data.items || [];
+}
 // パスワード入力欄（入力内容を伏せ字で表示）
 function askManualPassword() {
   return new Promise(resolve => {
@@ -1089,15 +1105,25 @@ async function init(forceRefresh = false) {
   }
 
   try {
-    allEvents = await fetchAllEvents(forceRefresh);
+allEvents = await fetchAllEvents(forceRefresh);
 
-    // D1に保存された手動登録配信を取得
-    const manualEvents = await fetchManualEvents();
+// D1に保存された自動取得配信を取得
+const savedAutoEvents = await fetchAutoEvents();
 
-    // 自動取得した配信をまとめる
-    const eventMap = new Map(
-      allEvents.map(event => [event.id, event])
-    );
+// D1に保存された手動登録配信を取得
+const manualEvents = await fetchManualEvents();
+
+// 自動取得データとD1保存済みデータを動画IDで統合
+const eventMap = new Map();
+
+[...allEvents, ...savedAutoEvents].forEach(event => {
+  if (event?.id) {
+    eventMap.set(event.id, {
+      ...eventMap.get(event.id),
+      ...event
+    });
+  }
+});
 
     // 手動登録した配信も最新情報を取得してから合流する
     const refreshedManualEvents = await Promise.all(
