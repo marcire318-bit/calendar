@@ -936,7 +936,16 @@ function renderCalendar(events) {
       .sort((a, b) =>
         new Date(getEventStart(a)) - new Date(getEventStart(b))
       );
-
+     if (
+  date.getFullYear() === 2026 &&
+  date.getMonth() === 8 &&
+  day === 11
+) {
+  console.log(
+    "9月11日の対象動画:",
+    dayEvents.filter(e => e.id === "lfUberkxaks")
+  );
+}
     dayEvents.forEach(event => {
       const eventElement = document.createElement("div");
       eventElement.className = `event ${getEventType(event)}`;
