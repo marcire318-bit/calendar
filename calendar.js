@@ -39,6 +39,7 @@ async function fetchManualEvents() {
 
   return data.items || [];
 }
+
 // D1に保存された自動取得配信を取得
 async function fetchAutoEvents() {
   const response = await fetch(
@@ -55,6 +56,25 @@ async function fetchAutoEvents() {
 
   return data.items || [];
 }
+
+// D1に保存された除外済み配信IDを取得
+async function fetchExcludedEventIds() {
+  const response = await fetch(
+    `${WORKER_URL}?resource=excluded-events`
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error ||
+      `除外リストの取得に失敗しました（HTTP ${response.status}）`
+    );
+  }
+
+  return new Set(data.items || []);
+}
+
 // パスワード入力欄（入力内容を伏せ字で表示）
 function askManualPassword() {
   return new Promise(resolve => {
@@ -434,20 +454,62 @@ async function deleteManualEvent(event) {
 
   if (!confirmed) return;
 
- const password = await askManualPassword();
- if (password === null) return;
+  const password = await askManualPassword();
+  if (password === null) return;
 
   try {
-    await saveManualEventToServer(event, "DELETE", password);
+    // 先に除外リストへ登録する
+    const response = await fetch(
+      `${WORKER_URL}?resource=excluded-events&id=${encodeURIComponent(event.id)}`,
+      {
+        method: "POST",
+        headers: {
+          "X-Manual-Password": password
+        }
+      }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error ||
+        `除外リストへの登録に失敗しました（HTTP ${response.status}）`
+      );
+    }
+
+    // 除外リストへの登録成功後に手動登録を削除する
+    try {
+      await saveManualEventToServer(event, "DELETE", password);
+    } catch (error) {
+      // 手動登録の削除に失敗したら、除外登録を取り消す
+      try {
+        const rollbackResponse = await fetch(
+          `${WORKER_URL}?resource=excluded-events&id=${encodeURIComponent(event.id)}`,
+          {
+            method: "DELETE",
+            headers: {
+              "X-Manual-Password": password
+            }
+          }
+        );
+
+        if (!rollbackResponse.ok) {
+          console.error("除外登録の取り消しにも失敗しました");
+        }
+      } catch (rollbackError) {
+        console.error("除外登録の取り消しに失敗:", rollbackError);
+      }
+
+      throw error;
+    }
   } catch (error) {
     console.error("手動登録の削除に失敗:", error);
-    alert(error.message);
+    alert(error.message || "削除に失敗しました。");
     return;
   }
 
-  allEvents = allEvents.filter(
-    item => item.id !== event.id
-  );
+  allEvents = allEvents.filter(item => item.id !== event.id);
 
   selectedEventId = null;
 
@@ -603,6 +665,27 @@ async function addManualEvent() {
 
    const password = await askManualPassword();
      if (password === null) return;
+
+    
+    // 以前に除外した動画なら、除外リストから解除する
+    const response = await fetch(
+      `${WORKER_URL}?resource=excluded-events&id=${encodeURIComponent(videoId)}`,
+      {
+        method: "DELETE",
+        headers: {
+          "X-Manual-Password": password
+        }
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result?.error ||
+        `除外リストの解除に失敗しました（HTTP ${response.status}）`
+      );
+    }
 
     await saveManualEventToServer(manualEvent, "POST", password);
 
@@ -1166,7 +1249,13 @@ const eventMap = new Map();
       eventMap.set(event.id, event);
     });
 
-    allEvents = [...eventMap.values()];
+    
+    // 除外した配信をカレンダーから取り除く
+    const excludedIds = await fetchExcludedEventIds();
+    allEvents = [...eventMap.values()].filter(
+      event => !excludedIds.has(event.id)
+    );
+
 
 renderCalendar(allEvents);
 
